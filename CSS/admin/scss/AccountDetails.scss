@@ -1,0 +1,95 @@
+.account-management .account-details {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: white;
+}
+
+.account-management .account-details .ids,
+.account-management .account-details .contact,
+.account-management .account-details .names,
+.account-management .account-details .roles {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.account-management .account-details .account-id,
+.account-management .account-details .provider-given-id,
+.account-management .account-details .email,
+.account-management .account-details .phone,
+.account-management .account-details .username,
+.account-management .account-details .nicename,
+.account-management .account-details .full-name,
+.account-management .account-details .account-status {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.account-management .account-details .user-activation-code,
+.account-management .account-details .password,
+.account-management .account-details .confirmation-code {
+  display: flex;
+  gap: 1rem;
+}
+
+.account-management .account-details .roles .roles-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  width: fit-content;
+}
+
+.account-management .account-details .account-status {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+}
+
+.account-management .account-details-session-management .sessions {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.account-management .account-details-session-management .sessions .session {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: white;
+}
+
+.account-management
+  .account-details-session-management
+  .sessions
+  .session
+  .session-token,
+.account-management
+  .account-details-session-management
+  .sessions
+  .session
+  .session-ip,
+.account-management
+  .account-details-session-management
+  .sessions
+  .session
+  .session-login-time,
+.account-management
+  .account-details-session-management
+  .sessions
+  .session
+  .session-expiration,
+.account-management
+  .account-details-session-management
+  .sessions
+  .session
+  .session-user-agent {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}

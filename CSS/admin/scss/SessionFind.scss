@@ -1,0 +1,44 @@
+.session-management .session-management-find {
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: none;
+}
+
+.session-management .session-management-find .find-session {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.session-management .session-management-find .session {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: white;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.session-management-find .session .account-id,
+.session-management-find .session .provider-given-id,
+.session-management-find .session .username,
+.session-management-find .session .ip,
+.session-management-find .session .login,
+.session-management-find .session .expiration,
+.session-management-find .session .user-agent,
+.session-management-find .session .algorithm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.session-management-find .session .access-token {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}

@@ -1,0 +1,103 @@
+@use '../../scss/_statusBar.scss';
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow: hidden;
+  width: 100vw;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  padding: 0 1rem;
+  gap: 1.5rem;
+}
+
+.options {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+
+  a {
+    button {
+      padding: 0.5em;
+    }
+    &.active button {
+      background-color: white;
+      color: black;
+      box-shadow: none;
+    }
+  }
+}
+
+.content {
+  width: 100%;
+
+  p {
+    max-width: 1000px;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  height: fit-content;
+  max-width: 1000px;
+  padding: 0.75rem;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.card {
+  box-shadow: var(--seven-tech-card-shadow);
+  border-radius: var(--seven-tech-border-radius);
+}
+
+.card.login-card,
+.card.signup-card,
+.card.reset-card {
+  max-width: 30rem;
+}
+
+button,
+.search-submit {
+  cursor: pointer;
+  border: none;
+  width: fit-content;
+  height: fit-content;
+
+  h2,
+  h3 {
+    padding: 0.5em;
+  }
+}
+
+button {
+  box-shadow: var(--seven-tech-btn-shadow);
+  border-radius: var(--seven-tech-border-radius);
+}

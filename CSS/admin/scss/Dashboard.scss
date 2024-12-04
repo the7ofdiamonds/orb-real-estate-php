@@ -1,0 +1,23 @@
+@use '../../scss/form';
+@use '../../scss/options';
+
+.dashboard {
+    padding-top: 1rem;
+}
+
+.options {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.options button h3 {
+    margin: 0;
+}
+
+.dashboard .google-creds {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}

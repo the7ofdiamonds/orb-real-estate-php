@@ -1,0 +1,86 @@
+.user-management {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.user-management h2,
+.user-management h3,
+.user-management h4 {
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.user-management .options {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.user-management .find-user {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.user-management .user-details {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background-color: white;
+}
+
+.user-management .user-details .user-id,
+.user-management .user-details .email,
+.user-management .user-details .names,
+.user-management .user-details .phone,
+.user-management .user-details .roles {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-management .user-details .username,
+.user-management .user-details .nicename,
+.user-management .user-details .full-name {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.user-management .user-details .roles .roles-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  width: fit-content;
+}
+
+.user-management .user-management-update,
+.user-management .user-management-role {
+  display: none;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+form.add-user-role,
+form.remove-user-role,
+form.change-username,
+form.change-nicename,
+form.change-nickname,
+form.change-firstname,
+form.change-lastname,
+form.change-phone {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,18 @@
+@use '../../scss/change';
+
+.account-management .account-management-update {
+  display: none;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.account-management .account-management-update .subscription,
+.account-management .account-management-update .password,
+.account-management .account-management-update .lock-account,
+.account-management .account-management-update .enable-account {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}

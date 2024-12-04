@@ -1,0 +1,39 @@
+.change {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+
+  .change-password,
+  .change-name,
+  .change-username,
+  .change-nickname,
+  .change-nicename,
+  .change-phone {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+  }
+
+  .change-password,
+  .change-name,
+  .change-username,
+  .change-nickname,
+  .change-nicename,
+  .change-phone {
+    justify-content: center;
+
+    .action {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+  }
+}

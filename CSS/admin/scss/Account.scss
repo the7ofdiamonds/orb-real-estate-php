@@ -1,0 +1,35 @@
+@use '../../scss/form';
+@use '../../scss/main';
+@use './AccountCreate.scss';
+@use './AccountDelete.scss';
+@use './AccountUpdate.scss';
+
+.account-management {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.account-management h2,
+.account-management h3,
+.account-management h4 {
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.account-management .options {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.account-management .find-account {
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}

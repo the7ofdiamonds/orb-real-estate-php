@@ -1,0 +1,65 @@
+.modal {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    z-index: 900;
+    top: 0;
+    background-color: rgba(0,0,0,0.4);
+    overflow: auto;
+
+    button,
+    .card {
+        box-shadow: none;
+    }
+}
+
+.show.modal,
+.show {
+    display: flex;
+}
+
+// .authentication {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     justify-content: center;
+//     gap: 2rem;
+//     padding-top: 4rem;
+//     width: 100%;
+
+//     .show.login-card,
+//     .show.signup-card,
+//     .show.reset-card {
+//         display: flex;
+//     }
+
+//     .hide {
+//         display: none;
+//     }
+
+//     .hide.login-card,
+//     .hide.signup-card,
+//     .hide.reset-card {
+//         display: none;
+//     }
+// }
+
+.modal-close {
+    cursor: pointer;
+    background-color: black;
+    height: 2rem;
+    width: 2rem;
+    line-height: 1rem;
+    border-radius: 50%;
+    text-align: center;
+
+    h2 {
+        color: white;
+        letter-spacing: 0;
+    }
+}

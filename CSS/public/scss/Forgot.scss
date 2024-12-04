@@ -1,0 +1,13 @@
+@use '_main.scss';
+@use '_options.scss';
+
+main.forgot {
+  margin-top: -5rem;
+
+  .forgot-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}

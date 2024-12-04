@@ -1,0 +1,143 @@
+{
+  "_LoginComponent.js": {
+    "file": "LoginComponent.js",
+    "imports": [
+      "src/index.jsx",
+      "_StatusBarComponent.js"
+    ]
+  },
+  "_NavigationLoginComponent.js": {
+    "file": "NavigationLoginComponent.js",
+    "imports": [
+      "src/index.jsx"
+    ]
+  },
+  "_StatusBarComponent.js": {
+    "file": "StatusBarComponent.js",
+    "imports": [
+      "src/index.jsx"
+    ]
+  },
+  "src/index.jsx": {
+    "dynamicImports": [
+      "src/views/FrontPage.jsx",
+      "src/views/About.jsx",
+      "src/views/Schedule.jsx",
+      "src/views/Login.jsx",
+      "src/views/Logout.jsx",
+      "src/views/Signup.jsx",
+      "src/views/Forgot.jsx",
+      "src/views/Dashboard.jsx",
+      "src/views/AccountActivation.jsx",
+      "src/views/AccountRecovery.jsx",
+      "src/views/PasswordRecovery.jsx"
+    ],
+    "file": "index.js",
+    "isEntry": true,
+    "src": "src/index.jsx"
+  },
+  "src/views/About.jsx": {
+    "file": "About.js",
+    "imports": [
+      "src/index.jsx",
+      "_NavigationLoginComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/About.jsx"
+  },
+  "src/views/AccountActivation.jsx": {
+    "file": "AccountActivation.js",
+    "imports": [
+      "src/index.jsx",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/AccountActivation.jsx"
+  },
+  "src/views/AccountRecovery.jsx": {
+    "file": "AccountRecovery.js",
+    "imports": [
+      "src/index.jsx",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/AccountRecovery.jsx"
+  },
+  "src/views/Dashboard.jsx": {
+    "file": "Dashboard.js",
+    "imports": [
+      "src/index.jsx",
+      "_LoginComponent.js",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Dashboard.jsx"
+  },
+  "src/views/Forgot.jsx": {
+    "file": "Forgot.js",
+    "imports": [
+      "src/index.jsx",
+      "_NavigationLoginComponent.js",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Forgot.jsx"
+  },
+  "src/views/FrontPage.jsx": {
+    "file": "FrontPage.js",
+    "imports": [
+      "src/index.jsx",
+      "_NavigationLoginComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/FrontPage.jsx"
+  },
+  "src/views/Login.jsx": {
+    "file": "Login.js",
+    "imports": [
+      "src/index.jsx",
+      "_LoginComponent.js",
+      "_NavigationLoginComponent.js",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Login.jsx"
+  },
+  "src/views/Logout.jsx": {
+    "file": "Logout.js",
+    "imports": [
+      "src/index.jsx",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Logout.jsx"
+  },
+  "src/views/PasswordRecovery.jsx": {
+    "file": "PasswordRecovery.js",
+    "imports": [
+      "src/index.jsx",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/PasswordRecovery.jsx"
+  },
+  "src/views/Schedule.jsx": {
+    "file": "Schedule.js",
+    "imports": [
+      "src/index.jsx",
+      "_NavigationLoginComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Schedule.jsx"
+  },
+  "src/views/Signup.jsx": {
+    "file": "Signup.js",
+    "imports": [
+      "src/index.jsx",
+      "_NavigationLoginComponent.js",
+      "_StatusBarComponent.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Signup.jsx"
+  }
+}

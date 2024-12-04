@@ -1,0 +1,14 @@
+@use '_form.scss';
+
+main.signup {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+  }
+}

@@ -1,0 +1,4 @@
+node_modules
+vendor
+serviceAccount.json
+.env

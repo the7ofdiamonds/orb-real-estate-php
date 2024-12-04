@@ -1,0 +1,189 @@
+{
+  "_ChangeUsername.js": {
+    "file": "ChangeUsername.js",
+    "imports": [
+      "src/index.jsx",
+      "_useDispatch.js"
+    ]
+  },
+  "_useDispatch.js": {
+    "file": "useDispatch.js",
+    "imports": [
+      "src/index.jsx"
+    ]
+  },
+  "src/index.jsx": {
+    "dynamicImports": [
+      "src/views/Dashboard.jsx",
+      "src/views/Account.jsx",
+      "src/views/AccountCreate.jsx",
+      "src/views/AccountFind.jsx",
+      "src/views/AccountUpdate.jsx",
+      "src/views/Details.jsx",
+      "src/views/Password.jsx",
+      "src/views/Session.jsx",
+      "src/views/SessionConfigure.jsx",
+      "src/views/SessionFind.jsx",
+      "src/views/SessionGet.jsx",
+      "src/views/User.jsx",
+      "src/views/UserCreate.jsx",
+      "src/views/UserDetails.jsx",
+      "src/views/UserFind.jsx",
+      "src/views/UserUpdate.jsx"
+    ],
+    "file": "index.js",
+    "isEntry": true,
+    "src": "src/index.jsx"
+  },
+  "src/views/Account.jsx": {
+    "file": "Account.js",
+    "imports": [
+      "src/index.jsx",
+      "src/views/AccountCreate.jsx",
+      "src/views/AccountFind.jsx",
+      "src/views/AccountUpdate.jsx",
+      "src/views/Details.jsx",
+      "_useDispatch.js",
+      "_ChangeUsername.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Account.jsx"
+  },
+  "src/views/AccountCreate.jsx": {
+    "file": "AccountCreate.js",
+    "imports": [
+      "src/index.jsx",
+      "_useDispatch.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/AccountCreate.jsx"
+  },
+  "src/views/AccountFind.jsx": {
+    "file": "AccountFind.js",
+    "imports": [
+      "src/index.jsx",
+      "_useDispatch.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/AccountFind.jsx"
+  },
+  "src/views/AccountUpdate.jsx": {
+    "file": "AccountUpdate.js",
+    "imports": [
+      "src/index.jsx",
+      "_ChangeUsername.js",
+      "_useDispatch.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/AccountUpdate.jsx"
+  },
+  "src/views/Dashboard.jsx": {
+    "file": "Dashboard.js",
+    "imports": [
+      "src/index.jsx",
+      "_useDispatch.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Dashboard.jsx"
+  },
+  "src/views/Details.jsx": {
+    "file": "Details.js",
+    "imports": [
+      "src/index.jsx",
+      "_useDispatch.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Details.jsx"
+  },
+  "src/views/Password.jsx": {
+    "file": "Password.js",
+    "imports": [
+      "src/index.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Password.jsx"
+  },
+  "src/views/Session.jsx": {
+    "file": "Session.js",
+    "imports": [
+      "src/index.jsx",
+      "src/views/SessionGet.jsx",
+      "src/views/SessionFind.jsx",
+      "src/views/SessionConfigure.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/Session.jsx"
+  },
+  "src/views/SessionConfigure.jsx": {
+    "file": "SessionConfigure.js",
+    "imports": [
+      "src/index.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/SessionConfigure.jsx"
+  },
+  "src/views/SessionFind.jsx": {
+    "file": "SessionFind.js",
+    "imports": [
+      "src/index.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/SessionFind.jsx"
+  },
+  "src/views/SessionGet.jsx": {
+    "file": "SessionGet.js",
+    "imports": [
+      "src/index.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/SessionGet.jsx"
+  },
+  "src/views/User.jsx": {
+    "file": "User.js",
+    "imports": [
+      "src/index.jsx",
+      "src/views/UserCreate.jsx",
+      "src/views/UserFind.jsx",
+      "src/views/UserUpdate.jsx",
+      "src/views/Details.jsx",
+      "_ChangeUsername.js",
+      "_useDispatch.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/User.jsx"
+  },
+  "src/views/UserCreate.jsx": {
+    "file": "UserCreate.js",
+    "imports": [
+      "src/index.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/UserCreate.jsx"
+  },
+  "src/views/UserDetails.jsx": {
+    "file": "UserDetails.js",
+    "imports": [
+      "src/index.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/UserDetails.jsx"
+  },
+  "src/views/UserFind.jsx": {
+    "file": "UserFind.js",
+    "imports": [
+      "src/index.jsx"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/UserFind.jsx"
+  },
+  "src/views/UserUpdate.jsx": {
+    "file": "UserUpdate.js",
+    "imports": [
+      "src/index.jsx",
+      "_ChangeUsername.js",
+      "_useDispatch.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "src/views/UserUpdate.jsx"
+  }
+}

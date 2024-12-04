@@ -1,0 +1,54 @@
+@use '_main.scss';
+@use '_form.scss';
+
+.login {
+
+  .login-options {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100vw;
+
+    .email-pass {
+      gap: 0.75rem;
+    }
+
+    .providers {
+      gap: 1rem;
+      .login-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 18rem;
+        text-align: left;
+
+        svg {
+          width: 3rem;
+          height: auto;
+          padding: 0.5em;
+        }
+
+        &.apple {
+          svg {
+            color: white;
+          }
+        }
+
+        h3 {
+          width: 100%;
+          letter-spacing: unset;
+        }
+      }
+    }
+
+    .email-pass,
+    .providers {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
