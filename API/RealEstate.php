@@ -78,7 +78,14 @@ class RealEstate
                 $providerID
             );
 
-            $addResponse = $this->propertyClass->add($property);
+            $add = $this->propertyClass->add($property);
+
+            if($add){
+                $addResponse = [
+                    "success_message" => "Real Estate Listing added.",
+                ];
+            }
+
             $response = new WP_REST_Response($addResponse);
             $response->set_status(200);
 

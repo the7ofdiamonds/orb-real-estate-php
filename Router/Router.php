@@ -129,28 +129,28 @@ class Router
                 }
             }
 
-            if (!empty($post_types_list)) {
-                foreach ($post_types_list as $post_type) {
-                    if (!isset($post_type['slug'])) {
-                        error_log('Regex is required for post types at Post_Types.');
-                        break;
-                    }
+            // if (!empty($post_types_list)) {
+            //     foreach ($post_types_list as $post_type) {
+            //         if (!isset($post_type['slug'])) {
+            //             error_log('Regex is required for post types at Post_Types.');
+            //             break;
+            //         }
 
-                    if (preg_match("#^/{$post_type['slug']}/([a-zA-Z-]+)#", $path)) {
-                        add_filter('single_template', function ($single_template) use ($post_type) {
-                            return $this->templates->get_single_page_template($single_template, $post_type);
-                        });
-                        break;
-                    }
+            //         if (preg_match("#^/{$post_type['slug']}/([a-zA-Z-]+)#", $path)) {
+            //             add_filter('single_template', function ($single_template) use ($post_type) {
+            //                 return $this->templates->get_single_page_template($single_template, $post_type);
+            //             });
+            //             break;
+            //         }
 
-                    if (preg_match("#^/{$post_type['slug']}#", $path)) {
-                        add_filter('archive_template', function ($archive_template) use ($post_type) {
-                            return $this->templates->get_archive_page_template($archive_template, $post_type);
-                        });
-                        break;
-                    }
-                }
-            }
+            //         if (preg_match("#^/{$post_type['slug']}#", $path)) {
+            //             add_filter('archive_template', function ($archive_template) use ($post_type) {
+            //                 return $this->templates->get_archive_page_template($archive_template, $post_type);
+            //             });
+            //             break;
+            //         }
+            //     }
+            // }
         } catch (Exception $e) {
             $errorMessage = $e->getMessage();
             $errorCode = $e->getCode();

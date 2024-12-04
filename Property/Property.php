@@ -2,25 +2,59 @@
 
 namespace ORB\Real_Estate\Property;
 
+use ORB\Real_Estate\Database\Database;
 use ORB\Real_Estate\Exception\DestructuredException;
 use ORB\Real_Estate\Model\RealEstateProperty;
 
 use Exception;
+use TypeError;
+
+use wpdb;
 
 class Property
 {
+    public wpdb $connection;
+
+    public function __construct()
+    {
+        $this->connection = (new Database())->connection;
+    }
 
     function add(RealEstateProperty $property)
     {
         try {
-            global $wpdb;
+            $highlights = serialize($property->highlights);
 
-            $results = $wpdb->get_results(
-                "CALL addRealEstateProperty('$property->type')"
+            $results = $this->connection->get_results(
+                "CALL addRealEstateProperty(
+                '$property->apnParcelID',
+                '$property->type',
+                '$property->streetNumber',
+                '$property->streetName',
+                '$property->city',
+                '$property->state',
+                '$property->zipcode',
+                '$property->country',
+                '$property->coordinates',
+                '$property->price',
+                '$property->priceSF',
+                '$property->capRate',
+                '$property->stories',
+                '$property->yearBuilt',
+                '$property->sprinklers',
+                '$property->parkingSpaces',
+                '$property->totalBldgSize',
+                '$property->landAcres',
+                '$property->landSqft',
+                '$property->zoning',
+                '$highlights',
+                '$property->overview',
+                '$property->providerID'
+                )"
             );
 
-            if ($wpdb->last_error) {
-                throw new Exception("Error executing stored procedure: " . $wpdb->last_error, 500);
+            if ($this->connection->last_error) {
+                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
             }
 
             if (!isset($results[0]) || !boolval($results[0])) {
@@ -35,60 +69,49 @@ class Property
         }
     }
 
+    function format($object)
+    {
+
+        if (is_serialized($object)) {
+            return unserialize($object);
+        }
+
+        return $object;
+    }
+
     function get(object $object)
     {
         try {
-            $id = isset($object['id']) ? $object['id'] : 'N/A';
-            $apnParcelID = isset($object['apn_parcel_id']) ? $object['apn_parcel_id'] : 'N/A';
-            $type = isset($object['type']) ? $object['type'] : 'N/A';
-            $streetNumber = isset($object['street_number']) ? $object['street_number'] : '';
-            $streetName = isset($object['street_address']) ? $object['street_address'] : '';
-            $city = isset($object['city']) ? $object['city'] : '';
-            $state = isset($object['state']) ? $object['state'] : '';
-            $zipcode = isset($object['zipcode']) ? $object['zipcode'] : '';
-            $country = isset($object['country']) ? $object['country'] : '';
-            $coordinates = isset($object['coordinates']) ? $object['coordinates'] : '';
-            $price = isset($object['price']) ? $object['price'] : 0;
-            $priceSF = isset($object['price_sqft']) ? $object['price_sqft'] : 0.0;
-            $capRate = isset($object['cap_rate']) ? $object['cap_rate'] : 0.0;
-            $stories = isset($object['stories']) ? $object['stories'] : 1;
-            $yearBuilt = isset($object['year_built']) ? $object['year_built'] : 0000;
-            $sprinklers = isset($object['sprinklers']) ? $object['sprinklers'] : '';
-            $parkingSpaces = isset($object['parking_spaces']) ? $object['parking_spaces'] : 0;
-            $totalBldgSize = isset($object['total_bldg_size']) ? $object['total_bldg_size'] : 0.0;
-            $landAcres = isset($object['land_acres']) ? $object['land_acres'] : 0.0;
-            $landSqft = isset($object['land_sqft']) ? $object['land_sqft'] : 0.0;
-            $zoning = isset($object['zoning']) ? $object['zoning'] : '';
-            $highlights = isset($object['highlights']) ? $object['highlights'] : [];
-            $overview = isset($object['overview']) ? $object['overview'] : '';
-            $providerID = isset($object['provider_id']) ? $object['provider_id'] : '';
+            $highlights = $this->format($object->highlights);
 
             return new RealEstateProperty(
-                $id,
-                $apnParcelID,
-                $type,
-                $streetNumber,
-                $streetName,
-                $city,
-                $state,
-                $zipcode,
-                $country,
-                $coordinates,
-                $price,
-                $priceSF,
-                $capRate,
-                $stories,
-                $yearBuilt,
-                $sprinklers,
-                $parkingSpaces,
-                $totalBldgSize,
-                $landAcres,
-                $landSqft,
-                $zoning,
+                $object->id,
+                $object->apn_parcel_id ?? 'N/A',
+                $object->type ?? 'N/A',
+                $object->street_number ?? '',
+                $object->street_name ?? '',
+                $object->city ?? '',
+                $object->state ?? '',
+                $object->zipcode ?? '',
+                $object->country ?? '',
+                $object->coordinates ?? '',
+                $object->price ?? 0.00,
+                $object->price_sqft ?? 0.0,
+                $object->cap_rate ?? 0.0,
+                $object->stories ?? 1,
+                $object->year_built ?? 0000,
+                $object->sprinklers ?? '',
+                $object->parking_spaces ?? 0,
+                $object->total_bldg_size ?? 0.0,
+                $object->land_acres ?? 0.0,
+                $object->land_sqft ?? 0.0,
+                $object->zoning ?? '',
                 $highlights,
-                $overview,
-                $providerID
+                $object->overview ?? '',
+                $object->provider_id ?? ''
             );
+        } catch (TypeError $e) {
+            throw new DestructuredException($e);
         } catch (DestructuredException $e) {
             throw new DestructuredException($e);
         } catch (Exception $e) {
@@ -138,14 +161,13 @@ class Property
     function byAPN(string $apn)
     {
         try {
-            global $wpdb;
 
-            $results = $wpdb->get_results(
+            $results = $this->connection->get_results(
                 "CALL getRealEstatePropertyByAPN('$apn')"
             );
 
-            if ($wpdb->last_error) {
-                throw new Exception("Error executing stored procedure: " . $wpdb->last_error, 500);
+            if ($this->connection->last_error) {
+                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
             }
 
             if (!isset($results[0]) || !boolval($results[0])) {
@@ -163,14 +185,13 @@ class Property
     function byID(string $id)
     {
         try {
-            global $wpdb;
 
-            $results = $wpdb->get_results(
+            $results = $this->connection->get_results(
                 "CALL getRealEstatePropertyByID('$id')"
             );
 
-            if ($wpdb->last_error) {
-                throw new Exception("Error executing stored procedure: " . $wpdb->last_error, 500);
+            if ($this->connection->last_error) {
+                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
             }
 
             if (!isset($results[0]) || !boolval($results[0])) {
