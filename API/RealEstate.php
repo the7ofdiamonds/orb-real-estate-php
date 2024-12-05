@@ -3,12 +3,17 @@
 namespace ORB\Real_Estate\API;
 
 use ORB\Real_Estate\Exception\DestructuredException;
+use ORB\Real_Estate\Model\BuildingDetails;
+use ORB\Real_Estate\Model\LandDetails;
+use ORB\Real_Estate\Model\Location;
+use ORB\Real_Estate\Model\PropertyClass;
+use ORB\Real_Estate\Model\RealEstateProperty;
+use ORB\Real_Estate\Model\RequestProperties;
+use ORB\Real_Estate\Model\SaleDetails;
+use ORB\Real_Estate\Property\Property;
 
 use Exception;
 use TypeError;
-
-use ORB\Real_Estate\Property\Property;
-use ORB\Real_Estate\Model\RealEstateProperty;
 
 use WP_REST_Request;
 use WP_REST_Response;
@@ -21,6 +26,7 @@ class RealEstate
     {
         $this->propertyClass = new Property();
     }
+
 
     function add(WP_REST_Request $request)
     {
@@ -80,7 +86,7 @@ class RealEstate
 
             $add = $this->propertyClass->add($property);
 
-            if($add){
+            if ($add) {
                 $addResponse = [
                     "success_message" => "Real Estate Listing added.",
                 ];
@@ -99,11 +105,44 @@ class RealEstate
         }
     }
 
+    public static function searchParams(string $encoded): RequestProperties
+    {
+        $rawData = json_decode($encoded, true);
+        $propertyClass = PropertyClass::fromString($rawData['property_class']);
+        $location = new Location(
+            $rawData['city'] ?? '',
+            $rawData['state'] ?? '',
+            $rawData['zipcode'] ?? '',
+            $rawData['country'] ?? '',
+            $rawData['coordinates'] ?? null
+        );
+        $saleDetails = new SaleDetails(
+            $rawData['price'] ?? 0.00,
+            $rawData['price_per_sqft'] ?? 0.00,
+            $rawData['cap_rate'] ?? 0.0
+        );
+        $buildingDetails = new BuildingDetails(
+            $rawData['stories'] ?? 1,
+            $rawData['year_built'] ?? 0000,
+            $rawData['sprinklers'] ?? false,
+            $rawData['total_building_size'] ?? 0.0
+        );
+        $landDetails = new LandDetails(
+            $rawData['land_acres'] ?? 0.0,
+            $rawData['land_sqft'] ?? 0.0,
+            $rawData['zoning'] ?? ''
+        );
+        $providers = $rawData['providers'] ?? [];
+
+        return new RequestProperties($propertyClass, $location, $saleDetails, $buildingDetails, $landDetails, $providers);
+    }
+
     function residential(WP_REST_Request $request)
     {
         try {
-            $query = $request->get_body();
-            $residentialResponse = $this->propertyClass->residential($query);
+            $body = $request->get_body();
+            $requestProperties = $this->searchParams($body);
+            $residentialResponse = $this->propertyClass->residential($requestProperties);
             $response = new WP_REST_Response($residentialResponse);
             $response->set_status(200);
 
@@ -118,8 +157,9 @@ class RealEstate
     function commercial(WP_REST_Request $request)
     {
         try {
-            $query = $request->get_body();
-            $commercialResponse = $this->propertyClass->commercial($query);
+            $body = $request->get_body();
+            $requestProperties = $this->searchParams($body);
+            $commercialResponse = $this->propertyClass->commercial($requestProperties);
             $response = new WP_REST_Response($commercialResponse);
             $response->set_status(200);
 
@@ -134,8 +174,9 @@ class RealEstate
     function search(WP_REST_Request $request)
     {
         try {
-            $query = $request->get_body();
-            $searchResponse = $this->propertyClass->search($query);
+            $body = $request->get_body();
+            $requestProperties = $this->searchParams($body); error_log(print_r($requestProperties, true));
+            $searchResponse = $this->propertyClass->search($requestProperties);
             $response = new WP_REST_Response($searchResponse);
             $response->set_status(200);
 

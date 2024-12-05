@@ -5,6 +5,7 @@ namespace ORB\Real_Estate\Property;
 use ORB\Real_Estate\Database\Database;
 use ORB\Real_Estate\Exception\DestructuredException;
 use ORB\Real_Estate\Model\RealEstateProperty;
+use ORB\Real_Estate\Model\RequestProperties;
 
 use Exception;
 use TypeError;
@@ -119,12 +120,29 @@ class Property
         }
     }
 
-    function residential($query)
+    function residential(RequestProperties $requestProperties)
     {
         try {
-            error_log(print_r($query, true));
 
-            return $query;
+            $results = $this->connection->get_results(
+                "CALL searchResidentialRealEstate()"
+            );
+
+            if ($this->connection->last_error) {
+                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
+            }
+
+            if (!isset($results[0]) || !boolval($results[0])) {
+                throw new Exception("No residential properties with the parameters could not be found in search.", 404);
+            }
+
+            $properties = [];
+
+            foreach ($results[0] as $property) {
+                $properties[] = $this->get($property);
+            }
+
+            return $properties;
         } catch (DestructuredException $e) {
             throw new DestructuredException($e);
         } catch (Exception $e) {
@@ -132,12 +150,29 @@ class Property
         }
     }
 
-    function commercial($query)
+    function commercial(RequestProperties $requestProperties)
     {
         try {
-            error_log(print_r($query, true));
 
-            return $query;
+            $results = $this->connection->get_results(
+                "CALL searchCommercialRealEstate()"
+            );
+
+            if ($this->connection->last_error) {
+                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
+            }
+
+            if (!isset($results[0]) || !boolval($results[0])) {
+                throw new Exception("No commercial properties with the parameters could not be found in search.", 404);
+            }
+
+            $properties = [];
+
+            foreach ($results[0] as $property) {
+                $properties[] = $this->get($property);
+            }
+
+            return $properties;
         } catch (DestructuredException $e) {
             throw new DestructuredException($e);
         } catch (Exception $e) {
@@ -145,12 +180,29 @@ class Property
         }
     }
 
-    function search($query)
+    function search(RequestProperties $requestProperties)
     {
         try {
-            error_log(print_r($query, true));
 
-            return $query;
+            $results = $this->connection->get_results(
+                "CALL searchRealEstate()"
+            );
+
+            if ($this->connection->last_error) {
+                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
+            }
+
+            if (!isset($results[0]) || !boolval($results[0])) {
+                throw new Exception("No properties with the parameters could not be found in search.", 404);
+            }
+
+            $properties = [];
+
+            foreach ($results[0] as $property) {
+                $properties[] = $this->get($property);
+            }
+
+            return $properties;
         } catch (DestructuredException $e) {
             throw new DestructuredException($e);
         } catch (Exception $e) {
