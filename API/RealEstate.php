@@ -23,7 +23,8 @@ class RealEstate
     function add(WP_REST_Request $request)
     {
         try {
-            $body = json_decode($request->get_body(), true);
+
+            $body = json_decode($request->get_body());
             $property = $this->propertyClass->create($body);
 
             $add = $this->propertyClass->add($property);

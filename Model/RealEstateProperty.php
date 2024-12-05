@@ -6,24 +6,24 @@ use JsonSerializable;
 
 class RealEstateProperty implements JsonSerializable
 {
-    public string $id;
-    public string $apnParcelID;
-    public PropertyClass $propertyClass;
-    public Location $location;
-    public SaleDetails $saleDetails;
-    public BuildingDetails $buildingDetails;
-    public LandDetails $landDetails;
-    public array $images;
-    public array $providers;
+    public ?string $id;
+    public ?string $apnParcelID;
+    public ?PropertyClass $propertyClass;
+    public ?Location $location;
+    public ?SaleDetails $saleDetails;
+    public ?BuildingDetails $buildingDetails;
+    public ?LandDetails $landDetails;
+    private ?array $images;
+    private ?array $providers;
 
     public function __construct(
         $id = '',
         $apnParcelID = 'N/A',
-        $propertyClass,
-        $location,
-        $saleDetails,
-        $buildingDetails,
-        $landDetails,
+        $propertyClass = '',
+        $location = null,
+        $saleDetails = null,
+        $buildingDetails = null,
+        $landDetails = null,
         $images = [],
         $providers = []
     ) {
@@ -51,5 +51,33 @@ class RealEstateProperty implements JsonSerializable
             'images' => $this->images,
             'providers' => $this->providers
         ];
+    }
+
+    public function setImages()
+    {
+        return serialize($this->images);
+    }
+
+    public function getImages()
+    {
+        if (!is_serialized($this->images)) {
+            return $this->images;
+        }
+
+        return serialize($this->images);
+    }
+
+    public function setProviders()
+    {
+        return serialize($this->providers);
+    }
+
+    public function getProviders()
+    {
+        if (!is_serialized($this->providers)) {
+            return $this->providers;
+        }
+
+        return serialize($this->providers);
     }
 }

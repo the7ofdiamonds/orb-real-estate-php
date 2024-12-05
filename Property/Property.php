@@ -5,6 +5,7 @@ namespace ORB\Real_Estate\Property;
 use ORB\Real_Estate\Database\Database;
 use ORB\Real_Estate\Exception\DestructuredException;
 use ORB\Real_Estate\Model\BuildingDetails;
+use ORB\Real_Estate\Model\Coordinates;
 use ORB\Real_Estate\Model\LandDetails;
 use ORB\Real_Estate\Model\Location;
 use ORB\Real_Estate\Model\PropertyClass;
@@ -12,6 +13,7 @@ use ORB\Real_Estate\Model\RealEstateProperty;
 use ORB\Real_Estate\Model\RequestProperties;
 use ORB\Real_Estate\Model\SaleDetails;
 
+use stdClass;
 use Exception;
 use TypeError;
 
@@ -26,44 +28,47 @@ class Property
         $this->connection = (new Database())->connection;
     }
 
-    function create(object $property)
+    function create(stdClass $property)
     {
+        $coordinates = new Coordinates(
+            $property->longitude ?? 0.0,
+            $property->latitude ?? 0.0
+        );
         $location = new Location(
-            $property['street_number'] ?? '',
-            $property['street_name'] ?? '',
-            $property['city'] ?? '',
-            $property['state'] ?? '',
-            $property['zipcode'] ?? '',
-            $property['country'] ?? '',
-            $property['coordinates'] ?? null
+            $property->street_number ?? '',
+            $property->street_name ?? '',
+            $property->city ?? '',
+            $property->state ?? '',
+            $property->zipcode ?? '',
+            $property->country ?? '',
+            $coordinates ?? null
         );
         $saleDetails = new SaleDetails(
-            $property['price'] ?? 0.00,
-            $property['price_per_sqft'] ?? 0.00,
-            $property['cap_rate'] ?? 0.0,
-            $property['overview'] ?? '',
-            $property['highlights'] ?? []
+            $property->price ?? 0.00,
+            $property->price_per_sqft ?? 0.00,
+            $property->overview ?? '',
+            $property->highlights ?? []
         );
         $buildingDetails = new BuildingDetails(
-            $property['stories'] ?? 1,
-            $property['year_built'] ?? 0000,
-            $property['sprinklers'] ?? false,
-            $property['total_building_size'] ?? 0.0
+            $property->stories ?? 1,
+            $property->year_built ?? 0000,
+            $property->sprinklers ?? false,
+            $property->total_building_size ?? 0.0
         );
         $landDetails = new LandDetails(
-            $property['land_acres'] ?? 0.0,
-            $property['land_sqft'] ?? 0.0,
-            $property['zoning'] ?? '',
-            $property['property_sub_type'] ?? [],
-            $property['parking_spaces'] ?? 0
+            $property->land_acres ?? 0.0,
+            $property->land_sqft ?? 0.0,
+            $property->zoning ?? '',
+            $property->property_sub_type ?? [],
+            $property->parking_spaces ?? 0
         );
-        $images = $property['images'] ?? [];
-        $providers = $property['providers'] ?? [];
+        $images = $property->images ?? [];
+        $providers = $property->providers ?? [];
 
         return new RealEstateProperty(
             '',
-            $property['apn_parcel_id'] ?? 'N/A',
-            PropertyClass::fromString($property['property_class']),
+            $property->apn_parcel_id ?? 'N/A',
+            PropertyClass::fromString($property->property_class),
             $location,
             $saleDetails,
             $buildingDetails,
@@ -76,34 +81,55 @@ class Property
     function add(RealEstateProperty $property)
     {
         try {
+            $propertyClass = $property->propertyClass->value ?? null;
+            $streetNumber = $property->location->streetNumber ?? null;
+            $streetName = $property->location->streetName ?? null;
+            $city = $property->location->city ?? null;
+            $state = $property->location->state ?? null;
+            $zipcode = $property->location->zipcode ?? null;
+            $country = $property->location->country ?? null;
+            $coordinates = $property->location->coordinates->setCoordinates() ?? null;
+            $price = $property->saleDetails->price ?? null;
+            $pricePerSqft = $property->saleDetails->pricePerSqft ?? null;
+            $overview = $property->saleDetails->overview ?? null;
+            $highlights = $property->saleDetails->setHighlights() ?? null;
+            $stories = $property->buildingDetails->stories ?? null;
+            $yearBuilt = $property->buildingDetails->yearBuilt ?? null;
+            $sprinklers = $property->buildingDetails->sprinklers ?? null;
+            $totalBldgSize = $property->buildingDetails->totalBldgSize ?? null;
+            $parkingSpaces = $property->landDetails->parkingSpaces ?? null;
+            $landAcres = $property->landDetails->landAcres ?? null;
+            $landSqft = $property->landDetails->landSqft ?? null;
+            $zoning = $property->landDetails->zoning ?? null;
+            $apnParcelID = $property->apnParcelID ?? null;
+            $providers = $property->setProviders() ?? null;
 
             $results = $this->connection->get_results(
                 "CALL addRealEstateProperty(
-                {$property->apnParcelID},
-                {$property->propertyClass->value},
-                {$property->location->streetNumber},
-                {$property->location->streetName},
-                {$property->location->city},
-                {$property->location->state},
-                {$property->location->zipcode},
-                {$property->location->country},
-                {$property->location->coordinates},
-                {$property->saleDetails->price},
-                {$property->saleDetails->pricePerSqft},
-                {$property->saleDetails->overview},
-                {$property->saleDetails->setHighlights()},
-                {$property->buildingDetails->stories},
-                {$property->buildingDetails->yearBuilt},
-                {$property->buildingDetails->sprinklers},
-                {$property->buildingDetails->totalBldgSize},
-                {$property->landDetails->parkingSpaces},
-                {$property->landDetails->landAcres},
-                {$property->landDetails->landSqft},
-                {$property->landDetails->zoning},
-                {$property->providers}
+                '$propertyClass',
+                '$streetNumber',
+                '$streetName',
+                '$city',
+                '$state',
+                '$zipcode',
+                '$country',
+                '$coordinates',
+                '$price',
+                '$pricePerSqft',
+                '$overview',
+                '$highlights',
+                '$stories',
+                '$yearBuilt',
+                '$sprinklers',
+                '$totalBldgSize',
+                '$parkingSpaces',
+                '$landAcres',
+                '$landSqft',
+                '$zoning',
+                '$apnParcelID',
+                '$providers'
                 )"
             );
-
             if ($this->connection->last_error) {
                 throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
             }
