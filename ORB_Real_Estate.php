@@ -65,9 +65,6 @@ class ORB_Real_Estate
         $dotenv = Dotenv::createImmutable(__DIR__);
         $dotenv->load();
 
-        $plugin = plugin_basename(__FILE__);
-        add_filter("plugin_action_links_{$plugin}", [$this, 'settings_link']);
-
         $admin = new Admin;
 
         add_action('admin_init', function () use ($admin) {
@@ -104,10 +101,9 @@ class ORB_Real_Estate
 
     function activate()
     {
-        (new Database)->establishConnection();
-        (new Database)->createTables();
-        $this->pages->add_pages();
-        $this->router->react_rewrite_rules();
+        (new Database)->setup();
+        // $this->pages->add_pages();
+        // $this->router->react_rewrite_rules();
     }
 
     function deactivate()
