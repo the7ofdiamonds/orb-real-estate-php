@@ -10,6 +10,7 @@ use PDOException;
 
 class Database
 {
+    public string $directory;
     private string $db_name;
     private string $db_host;
     private string $db_user;
@@ -28,6 +29,8 @@ class Database
 
     public function __construct()
     {
+        $this->directory = ORB_REAL_ESTATE . 'Database';
+
         global $wpdb;
         $this->db_name = isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : 'orb';
         $this->db_host = isset($_ENV['DB_HOST']) ? $_ENV['DB_HOST'] : $wpdb->dbhost;
@@ -85,10 +88,9 @@ class Database
         }
     }
 
-    function getSQLFilenames(string $dir) : array
+    function getSQLFilenames(string $directory): array
     {
         $sqlFiles = [];
-        $directory = ORB_REAL_ESTATE . 'Database/' . $dir;
 
         if (!file_exists($directory)) {
             throw new Exception("Directory does not exists.");
@@ -104,7 +106,7 @@ class Database
             $file_info = pathinfo($file);
 
             if (isset($file_info['extension']) && strtolower($file_info['extension']) === 'sql') {
-                $sqlFiles[] = $file_info['filename'];
+                $sqlFiles[] = $file_info;
             }
         }
 
@@ -113,18 +115,47 @@ class Database
 
     function camelToSnake($input)
     {
-        // Add an underscore before any uppercase letter and convert to lowercase
         $output = preg_replace('/([a-z])([A-Z])/', '$1_$2', $input);
-        return strtolower($output); // Convert the entire string to lowercase
+        return strtolower($output);
+    }
+
+    function execute(string $file)
+    {
+        try {
+
+            if (!file_exists($file)) {
+                throw new Exception("Directory does not exists.");
+            }
+
+            $sql = file_get_contents($file);
+
+            if ($sql === false) {
+                throw new Exception("Error reading SQL file.");
+            }
+
+            $this->pdo->exec($sql);
+
+            add_action('admin_notices', function () {
+                echo '<div class="notice notice-success"><p>Table created successfully.</p></div>';
+            });
+        } catch (PDOException $e) {
+            error_log("Error creating table: " . $e->getMessage());
+            add_action('admin_notices', function () {
+                echo '<div class="notice notice-error"><p>Error creating table. Check the logs for details.</p></div>';
+            });
+        } catch (Exception $e) {
+            error_log("Error: " . $e->getMessage());
+        }
     }
 
     function tablesExists()
     {
         try {
-            $tableNames = $this->getSQLFilenames('Tables');
+            $dir = $this->directory . '/Tables';
+            $tables = $this->getSQLFilenames($dir);
 
-            foreach ($tableNames as $tableName) {
-                $table_name = $this->camelToSnake($tableName);
+            foreach ($tables as $table) {
+                $table_name = $this->camelToSnake($table['filename']);
                 $query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :db_name AND TABLE_NAME = :table_name";
                 $stmt = $this->pdo->prepare($query);
                 $stmt->bindParam(':db_name', $this->db_name, PDO::PARAM_STR);
@@ -136,7 +167,8 @@ class Database
                 if ($table_check) {
                     error_log("Table exists.\n");
                 } else {
-                    error_log("Table does not exist.\n");
+                    $file = $dir . '/' . $table['basename'];
+                    $this->execute($file);
                 }
             }
         } catch (PDOException $e) {
@@ -149,33 +181,31 @@ class Database
         }
     }
 
-    function viewExists()
+    function viewsExists()
     {
         try {
-            // Check if view exists
-            $view_check = $this->pdo->query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = $this->db_name AND TABLE_NAME = 'your_view_name'")->fetch();
+            $dir = $this->directory . '/Views';
+            $views = $this->getSQLFilenames($dir);
 
-            if ($view_check) {
-                echo "View exists.\n";
-            } else {
-                echo "View does not exist.\n";
+            if (count($views) == 0) {
+                throw new Exception("No views to add in this directory.");
             }
 
-            $tableNames = [];
-
-            foreach ($tableNames as $tableName) {
-                $query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :db_name AND TABLE_NAME = :table_name";
+            foreach ($views as $view) {
+                $view_name = $this->camelToSnake($view['filename']);
+                $query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = :db_name AND TABLE_NAME = :view_name";
                 $stmt = $this->pdo->prepare($query);
                 $stmt->bindParam(':db_name', $this->db_name, PDO::PARAM_STR);
-                $stmt->bindParam(':table_name', $tableName, PDO::PARAM_STR);
+                $stmt->bindParam(':view_name', $view_name, PDO::PARAM_STR);
                 $stmt->execute();
 
-                $table_check = $stmt->fetch();
+                $view_check = $stmt->fetch();
 
-                if ($table_check) {
-                    echo "Table exists.\n";
+                if ($view_check) {
+                    error_log("View exists.\n");
                 } else {
-                    echo "Table does not exist.\n";
+                    $file = $dir . '/' . $view['basename'];
+                    $this->execute($file);
                 }
             }
         } catch (PDOException $e) {
@@ -188,57 +218,31 @@ class Database
         }
     }
 
-    function procedureExists()
+    function proceduresExists()
     {
         try {
-            // Check if stored procedure exists
-            $procedure_check = $this->pdo->query("SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = $this->db_name AND ROUTINE_NAME = 'your_procedure_name' AND ROUTINE_TYPE = 'PROCEDURE'")->fetch();
+            $dir = $this->directory . '/Procedures';
+            $procedures = $this->getSQLFilenames($dir);
 
-            if ($procedure_check) {
-                echo "Procedure exists.\n";
-            } else {
-                echo "Procedure does not exist.\n";
-            }
-        } catch (PDOException $e) {
-            error_log("Error creating table: " . $e->getMessage());
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>Error creating table. Check the logs for details.</p></div>';
-            });
-        } catch (Exception $e) {
-            error_log("Error: " . $e->getMessage());
-        }
-    }
-
-    function execute(string $path)
-    {
-        try {
-            $directory = ORB_REAL_ESTATE . 'Database/' . $path;
-
-            if (!file_exists($directory)) {
-                throw new Exception("Directory does not exists.");
+            if (count($procedures) == 0) {
+                throw new Exception("No procedures to add in this directory.");
             }
 
-            $files = scandir($directory);
+            foreach ($procedures as $procedure) {
+                $procedure_name = lcfirst($procedure['filename']);
+                $query = "SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = :db_name AND ROUTINE_NAME = :procedure_name AND ROUTINE_TYPE = 'PROCEDURE'";
+                $stmt = $this->pdo->prepare($query);
+                $stmt->bindParam(':db_name', $this->db_name, PDO::PARAM_STR);
+                $stmt->bindParam(':procedure_name', $procedure_name, PDO::PARAM_STR);
+                $stmt->execute();
 
-            if (count($files) == 0) {
-                throw new Exception("No files in this directory: $directory");
-            }
+                $procedure_check = $stmt->fetch();
 
-            foreach ($files as $file) {
-                $file_info = pathinfo($file);
-
-                if (isset($file_info['extension']) && strtolower($file_info['extension']) === 'sql') {
-                    $sql = file_get_contents($directory . '/' . $file);
-
-                    if ($sql === false) {
-                        throw new Exception("Error reading SQL file.");
-                    }
-
-                    $this->pdo->exec($sql);
-
-                    add_action('admin_notices', function () {
-                        echo '<div class="notice notice-success"><p>Table created successfully.</p></div>';
-                    });
+                if ($procedure_check) {
+                    error_log("Procedure exists.\n");
+                } else {
+                    $file = $dir . '/' . $procedure['basename'];
+                    $this->execute($file);
                 }
             }
         } catch (PDOException $e) {
@@ -249,32 +253,13 @@ class Database
         } catch (Exception $e) {
             error_log("Error: " . $e->getMessage());
         }
-    }
-
-    function createTables()
-    {
-        $path = 'Tables';
-        return $this->execute($path);
-    }
-
-    function addStoredProcedures()
-    {
-        $path = 'Procedure';
-        return $this->execute($path);
-    }
-
-    function addViews()
-    {
-        $path = 'View';
-        return $this->execute($path);
     }
 
     function setup()
     {
-        // $this->exists();
+        $this->exists();
         $this->tablesExists();
-        // $this->createTables();
-        // $this->addStoredProcedures();
-        // $this->addViews();
+        $this->viewsExists();
+        $this->proceduresExists();
     }
 }
