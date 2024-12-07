@@ -2,9 +2,10 @@
 
 namespace ORB\Real_Estate\Database;
 
+use ORB\Real_Estate\Exception\DestructuredException;
+
 use Exception;
 
-use wpdb;
 use PDO;
 use PDOException;
 
@@ -24,8 +25,7 @@ class Database
     private string $standard_conforming_strings;
     private string $encoding = 'UTF8';
     private string $dsn;
-    private PDO $pdo;
-    public wpdb $connection;
+    public PDO $connection;
 
     public function __construct()
     {
@@ -52,74 +52,86 @@ class Database
             $this->primary_key_config = 'SERIAL';
             $this->standard_conforming_strings = 'ON';
         }
+    }
 
-        $this->pdo = new PDO($this->dsn, $this->db_user, $this->db_password);
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        if (!isset($_ENV['DB_TYPE']) || $_ENV['DB_TYPE'] == null) {
-            $this->connection = new wpdb($this->db_user, $this->db_password, $this->db_name, $this->db_host);
-        } else {
-            $this->connection = new DatabaseCustom($this->db_user, $this->db_password, $this->db_name, $this->db_host);
+    function getConnection()
+    {
+        try {
+            $connection = new PDO($this->dsn, $this->db_user, $this->db_password);
+            $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $connection;
+        } catch (PDOException $e) {
+            throw new DestructuredException($e);
         }
     }
 
-    function exists()
+    function exists(): bool
     {
         try {
+            $dsn = "mysql:host=$this->db_host;";
+            $pdo = new PDO($dsn, $this->db_user, $this->db_password);
             $query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :db_name";
-            $stmt = $this->pdo->prepare($query);
+            $stmt = $pdo->prepare($query);
             $stmt->bindParam(':db_name', $this->db_name, PDO::PARAM_STR);
             $stmt->execute();
 
-            $db_check = $stmt->fetch();
-
-            if ($db_check) {
-                error_log("Database exists.");
+            if ($stmt->fetch()) {
+                error_log("Database exists.\n");
+                return true;
             } else {
-                error_log("Database does not exist.");
+                $createDatabaseQuery = "CREATE DATABASE `$this->db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
+
+                if ($pdo->exec($createDatabaseQuery) !== false) {
+                    return true;
+                }
             }
+
+            return false;
         } catch (PDOException $e) {
-            error_log("Error creating table: " . $e->getMessage());
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>Error creating table. Check the logs for details.</p></div>';
-            });
+            throw new DestructuredException($e);
         } catch (Exception $e) {
-            error_log("Error: " . $e->getMessage());
+            throw new DestructuredException($e);
         }
     }
 
     function getSQLFilenames(string $directory): array
     {
-        $sqlFiles = [];
+        try {
+            $sqlFiles = [];
 
-        if (!file_exists($directory)) {
-            throw new Exception("Directory does not exists.");
-        }
-
-        $files = scandir($directory);
-
-        if (count($files) == 0) {
-            throw new Exception("No files in this directory: $directory");
-        }
-
-        foreach ($files as $file) {
-            $file_info = pathinfo($file);
-
-            if (isset($file_info['extension']) && strtolower($file_info['extension']) === 'sql') {
-                $sqlFiles[] = $file_info;
+            if (!file_exists($directory)) {
+                throw new Exception("Directory does not exists.");
             }
-        }
 
-        return $sqlFiles;
+            $files = scandir($directory);
+
+            if (count($files) == 0) {
+                error_log("No files in this directory: $directory\n");
+                return $sqlFiles;
+            }
+
+            foreach ($files as $file) {
+                $file_info = pathinfo($file);
+
+                if (isset($file_info['extension']) && strtolower($file_info['extension']) === 'sql') {
+                    $sqlFiles[] = $file_info;
+                }
+            }
+
+            return $sqlFiles;
+        } catch (Exception $e) {
+            throw new DestructuredException($e);
+        }
     }
 
-    function camelToSnake($input)
+    function camelToSnake(string $input): string
     {
         $output = preg_replace('/([a-z])([A-Z])/', '$1_$2', $input);
+
         return strtolower($output);
     }
 
-    function execute(string $file)
+    function execute(string $file): bool
     {
         try {
 
@@ -133,133 +145,165 @@ class Database
                 throw new Exception("Error reading SQL file.");
             }
 
-            $this->pdo->exec($sql);
+            $pdo = new PDO($this->dsn, $this->db_user, $this->db_password);
+            $executed = $pdo->exec($sql);
 
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-success"><p>Table created successfully.</p></div>';
-            });
+            if ($executed === false) {
+                throw new Exception("There was an error executing SQL command.");
+            }
+
+            return true;
         } catch (PDOException $e) {
-            error_log("Error creating table: " . $e->getMessage());
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>Error creating table. Check the logs for details.</p></div>';
-            });
+            throw new DestructuredException($e);
         } catch (Exception $e) {
-            error_log("Error: " . $e->getMessage());
+            throw new DestructuredException($e);
         }
     }
 
-    function tablesExists()
+    function tablesExists(): bool
     {
         try {
             $dir = $this->directory . '/Tables';
             $tables = $this->getSQLFilenames($dir);
 
+            if (count($tables) == 0) {
+                error_log("No tables to add in this directory.\n");
+                return true;
+            }
+
+            $pdo = new PDO($this->dsn, $this->db_user, $this->db_password);
+
             foreach ($tables as $table) {
                 $table_name = $this->camelToSnake($table['filename']);
                 $query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :db_name AND TABLE_NAME = :table_name";
-                $stmt = $this->pdo->prepare($query);
+                $stmt = $pdo->prepare($query);
                 $stmt->bindParam(':db_name', $this->db_name, PDO::PARAM_STR);
                 $stmt->bindParam(':table_name', $table_name, PDO::PARAM_STR);
                 $stmt->execute();
 
-                $table_check = $stmt->fetch();
-
-                if ($table_check) {
+                if ($stmt->fetch()) {
                     error_log("Table exists.\n");
+                    return true;
                 } else {
                     $file = $dir . '/' . $table['basename'];
                     $this->execute($file);
                 }
             }
+
+            return true;
         } catch (PDOException $e) {
-            error_log("Error creating table: " . $e->getMessage());
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>Error creating table. Check the logs for details.</p></div>';
-            });
+            throw new DestructuredException($e);
         } catch (Exception $e) {
-            error_log("Error: " . $e->getMessage());
+            throw new DestructuredException($e);
+        } catch (DestructuredException $e) {
+            throw new DestructuredException($e);
         }
     }
 
-    function viewsExists()
+    function viewsExists(): bool
     {
         try {
             $dir = $this->directory . '/Views';
             $views = $this->getSQLFilenames($dir);
 
             if (count($views) == 0) {
-                throw new Exception("No views to add in this directory.");
+                error_log("No views to add in this directory.\n");
+                return true;
             }
+
+            $pdo = new PDO($this->dsn, $this->db_user, $this->db_password);
 
             foreach ($views as $view) {
                 $view_name = $this->camelToSnake($view['filename']);
                 $query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_SCHEMA = :db_name AND TABLE_NAME = :view_name";
-                $stmt = $this->pdo->prepare($query);
+                $stmt = $pdo->prepare($query);
                 $stmt->bindParam(':db_name', $this->db_name, PDO::PARAM_STR);
                 $stmt->bindParam(':view_name', $view_name, PDO::PARAM_STR);
                 $stmt->execute();
 
-                $view_check = $stmt->fetch();
-
-                if ($view_check) {
+                if ($stmt->fetch()) {
                     error_log("View exists.\n");
+                    return true;
                 } else {
                     $file = $dir . '/' . $view['basename'];
                     $this->execute($file);
                 }
             }
+
+            return true;
         } catch (PDOException $e) {
-            error_log("Error creating table: " . $e->getMessage());
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>Error creating table. Check the logs for details.</p></div>';
-            });
+            throw new DestructuredException($e);
         } catch (Exception $e) {
-            error_log("Error: " . $e->getMessage());
+            throw new DestructuredException($e);
+        } catch (DestructuredException $e) {
+            throw new DestructuredException($e);
         }
     }
 
-    function proceduresExists()
+    function proceduresExists(): bool
     {
         try {
             $dir = $this->directory . '/Procedures';
             $procedures = $this->getSQLFilenames($dir);
 
             if (count($procedures) == 0) {
-                throw new Exception("No procedures to add in this directory.");
+                error_log("No procedures to add in this directory.\n");
+                return true;
             }
+
+            $pdo = new PDO($this->dsn, $this->db_user, $this->db_password);
 
             foreach ($procedures as $procedure) {
                 $procedure_name = lcfirst($procedure['filename']);
                 $query = "SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = :db_name AND ROUTINE_NAME = :procedure_name AND ROUTINE_TYPE = 'PROCEDURE'";
-                $stmt = $this->pdo->prepare($query);
+                $stmt = $pdo->prepare($query);
                 $stmt->bindParam(':db_name', $this->db_name, PDO::PARAM_STR);
                 $stmt->bindParam(':procedure_name', $procedure_name, PDO::PARAM_STR);
                 $stmt->execute();
 
-                $procedure_check = $stmt->fetch();
-
-                if ($procedure_check) {
+                if ($stmt->fetch()) {
                     error_log("Procedure exists.\n");
+                    return true;
                 } else {
                     $file = $dir . '/' . $procedure['basename'];
                     $this->execute($file);
                 }
             }
+
+            return true;
         } catch (PDOException $e) {
-            error_log("Error creating table: " . $e->getMessage());
-            add_action('admin_notices', function () {
-                echo '<div class="notice notice-error"><p>Error creating table. Check the logs for details.</p></div>';
-            });
+            throw new DestructuredException($e);
         } catch (Exception $e) {
-            error_log("Error: " . $e->getMessage());
+            throw new DestructuredException($e);
+        } catch (DestructuredException $e) {
+            throw new DestructuredException($e);
         }
     }
 
-    function setup()
+    function setup(): bool
     {
-        $this->exists();
-        $this->tablesExists();
-        $this->viewsExists();
-        $this->proceduresExists();
+        try {
+            $databaseExists = $this->exists();
+
+            if ($databaseExists) {
+                $tablesExists = $this->tablesExists();
+
+                if ($tablesExists) {
+                    $viewsExists = $this->viewsExists();
+                }
+
+                if ($viewsExists) {
+                    $proceduresExists = $this->proceduresExists();
+
+                    if ($proceduresExists) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } catch (DestructuredException $e) {
+            throw new DestructuredException($e);
+        }
     }
 }

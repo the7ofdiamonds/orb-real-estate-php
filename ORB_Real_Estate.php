@@ -31,6 +31,7 @@ use ORB\Real_Estate\Admin\Admin;
 use ORB\Real_Estate\API\API;
 use ORB\Real_Estate\CSS\CSS;
 use ORB\Real_Estate\Database\Database;
+use ORB\Real_Estate\Exception\DestructuredException;
 use ORB\Real_Estate\JS\JS;
 use ORB\Real_Estate\Pages\Pages;
 use ORB\Real_Estate\Post_Types\Post_Types;
@@ -101,9 +102,13 @@ class ORB_Real_Estate
 
     function activate()
     {
-        (new Database)->setup();
-        // $this->pages->add_pages();
-        // $this->router->react_rewrite_rules();
+        try {
+            (new Database())->setup();
+            // $this->pages->add_pages();
+            // $this->router->react_rewrite_rules();
+        } catch (DestructuredException $e) {
+            error_log($e->getErrorMessage());
+        }
     }
 
     function deactivate()

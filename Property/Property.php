@@ -17,15 +17,16 @@ use stdClass;
 use Exception;
 use TypeError;
 
-use wpdb;
+use PDO;
+use PDOException;
 
 class Property
 {
-    public wpdb $connection;
+    public PDO $connection;
 
     public function __construct()
     {
-        $this->connection = (new Database())->connection;
+        $this->connection = (new Database())->getConnection();
     }
 
     function create(stdClass $property)
@@ -104,41 +105,46 @@ class Property
             $apnParcelID = $property->apnParcelID ?? null;
             $providers = $property->setProviders() ?? null;
 
-            $results = $this->connection->get_results(
-                "CALL addRealEstateProperty(
-                '$propertyClass',
-                '$streetNumber',
-                '$streetName',
-                '$city',
-                '$state',
-                '$zipcode',
-                '$country',
-                '$coordinates',
-                '$price',
-                '$pricePerSqft',
-                '$overview',
-                '$highlights',
-                '$stories',
-                '$yearBuilt',
-                '$sprinklers',
-                '$totalBldgSize',
-                '$parkingSpaces',
-                '$landAcres',
-                '$landSqft',
-                '$zoning',
-                '$apnParcelID',
-                '$providers'
-                )"
-            );
-            if ($this->connection->last_error) {
-                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
+            $stmt = $this->connection->prepare("
+            CALL addRealEstateProperty(
+                :propertyClass, :streetNumber, :streetName, :city, :state,
+                :zipcode, :country, :coordinates, :price, :pricePerSqft,
+                :overview, :highlights, :stories, :yearBuilt, :sprinklers,
+                :totalBldgSize, :parkingSpaces, :landAcres, :landSqft,
+                :zoning, :apnParcelID, :providers
+            )
+        ");
+
+            $stmt->bindParam(':propertyClass', $propertyClass);
+            $stmt->bindParam(':streetNumber', $streetNumber);
+            $stmt->bindParam(':streetName', $streetName);
+            $stmt->bindParam(':city', $city);
+            $stmt->bindParam(':state', $state);
+            $stmt->bindParam(':zipcode', $zipcode);
+            $stmt->bindParam(':country', $country);
+            $stmt->bindParam(':coordinates', $coordinates);
+            $stmt->bindParam(':price', $price);
+            $stmt->bindParam(':pricePerSqft', $pricePerSqft);
+            $stmt->bindParam(':overview', $overview);
+            $stmt->bindParam(':highlights', $highlights);
+            $stmt->bindParam(':stories', $stories);
+            $stmt->bindParam(':yearBuilt', $yearBuilt);
+            $stmt->bindParam(':sprinklers', $sprinklers);
+            $stmt->bindParam(':totalBldgSize', $totalBldgSize);
+            $stmt->bindParam(':parkingSpaces', $parkingSpaces);
+            $stmt->bindParam(':landAcres', $landAcres);
+            $stmt->bindParam(':landSqft', $landSqft);
+            $stmt->bindParam(':zoning', $zoning);
+            $stmt->bindParam(':apnParcelID', $apnParcelID);
+            $stmt->bindParam(':providers', $providers);
+
+            if ($stmt->execute()) {
+                return true;
             }
 
-            if (!isset($results[0]) || !boolval($results[0])) {
-                throw new Exception('Property could not be added.', 404);
-            }
-
-            return true;
+            return false;
+        } catch (PDOException $e) {
+            throw new DestructuredException($e);
         } catch (DestructuredException $e) {
             throw new DestructuredException($e);
         } catch (Exception $e) {
@@ -238,17 +244,9 @@ class Property
             $landDetails = $requestProperties->landDetails;
             $providers = $requestProperties->providers;
 
-            $results = $this->connection->get_results(
+            $results = $this->connection->prepare(
                 "CALL searchResidentialRealEstate()"
             );
-
-            if ($this->connection->last_error) {
-                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
-            }
-
-            if (!isset($results[0]) || !boolval($results[0])) {
-                throw new Exception("No residential properties with the parameters could not be found in search.", 404);
-            }
 
             $properties = [];
 
@@ -273,17 +271,9 @@ class Property
             $landDetails = $requestProperties->landDetails;
             $providers = $requestProperties->providers;
 
-            $results = $this->connection->get_results(
+            $results = $this->connection->prepare(
                 "CALL searchCommercialRealEstate()"
             );
-
-            if ($this->connection->last_error) {
-                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
-            }
-
-            if (!isset($results[0]) || !boolval($results[0])) {
-                throw new Exception("No commercial properties with the parameters could not be found in search.", 404);
-            }
 
             $properties = [];
 
@@ -309,17 +299,9 @@ class Property
             $landDetails = $requestProperties->landDetails;
             $providers = $requestProperties->providers;
 
-            $results = $this->connection->get_results(
+            $results = $this->connection->prepare(
                 "CALL searchRealEstate('$propertyClass->value', '$location->city', '$location->zipcode', '$saleDetails->price')"
             );
-
-            if ($this->connection->last_error) {
-                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
-            }
-
-            if (!isset($results[0]) || !boolval($results[0])) {
-                throw new Exception("No properties with the parameters could not be found in search.", 404);
-            }
 
             $properties = [];
 
@@ -339,17 +321,9 @@ class Property
     {
         try {
 
-            $results = $this->connection->get_results(
+            $results = $this->connection->prepare(
                 "CALL getRealEstatePropertyByAPN('$apn')"
             );
-
-            if ($this->connection->last_error) {
-                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
-            }
-
-            if (!isset($results[0]) || !boolval($results[0])) {
-                throw new Exception("Property with the APN#{$apn} could not be found.", 404);
-            }
 
             return $this->get($results[0]);
         } catch (DestructuredException $e) {
@@ -363,17 +337,9 @@ class Property
     {
         try {
 
-            $results = $this->connection->get_results(
+            $results = $this->connection->prepare(
                 "CALL getRealEstatePropertyByID('$id')"
             );
-
-            if ($this->connection->last_error) {
-                throw new Exception("Error executing stored procedure: " . $this->connection->last_error, 500);
-            }
-
-            if (!isset($results[0]) || !boolval($results[0])) {
-                throw new Exception("Property with the ID#{$id} could not be found.", 404);
-            }
 
             return $this->get($results[0]);
         } catch (DestructuredException $e) {
