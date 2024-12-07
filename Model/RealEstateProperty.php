@@ -69,15 +69,15 @@ class RealEstateProperty implements JsonSerializable
 
     public function setProviders()
     {
-        return serialize($this->providers);
+        return json_encode($this->providers);
     }
 
-    public function getProviders()
-    {
-        if (!is_serialized($this->providers)) {
-            return $this->providers;
-        }
+    // public function getProviders()
+    // {
+    //     if (!is_serialized($this->providers)) {
+    //         return $this->providers;
+    //     }
 
-        return serialize($this->providers);
-    }
+    //     return json_decode($this->providers);
+    // }
 }

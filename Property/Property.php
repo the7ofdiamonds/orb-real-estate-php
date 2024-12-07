@@ -106,36 +106,35 @@ class Property
             $providers = $property->setProviders() ?? null;
 
             $stmt = $this->connection->prepare("
-            CALL addRealEstateProperty(
-                :propertyClass, :streetNumber, :streetName, :city, :state,
-                :zipcode, :country, :coordinates, :price, :pricePerSqft,
-                :overview, :highlights, :stories, :yearBuilt, :sprinklers,
-                :totalBldgSize, :parkingSpaces, :landAcres, :landSqft,
-                :zoning, :apnParcelID, :providers
-            )
-        ");
+                CALL addRealEstateProperty(
+                    :property_class, :street_number, :street_name, :city, :state,
+                    :zipcode, :country, :coordinates, :price, :price_per_sqft, :overview,
+                    :highlights, :stories, :year_built, :sprinklers, :total_building_size,
+                    :parking_spaces, :land_acres, :land_sqft, :zoning, :apn_parcel_id, :providers
+                )
+            ");
 
-            $stmt->bindParam(':propertyClass', $propertyClass);
-            $stmt->bindParam(':streetNumber', $streetNumber);
-            $stmt->bindParam(':streetName', $streetName);
+            $stmt->bindParam(':property_class', $propertyClass);
+            $stmt->bindParam(':street_number', $streetNumber);
+            $stmt->bindParam(':street_name', $streetName);
             $stmt->bindParam(':city', $city);
             $stmt->bindParam(':state', $state);
             $stmt->bindParam(':zipcode', $zipcode);
             $stmt->bindParam(':country', $country);
             $stmt->bindParam(':coordinates', $coordinates);
-            $stmt->bindParam(':price', $price);
-            $stmt->bindParam(':pricePerSqft', $pricePerSqft);
+            $stmt->bindParam(':price', $price, PDO::PARAM_INT);
+            $stmt->bindParam(':price_per_sqft', $pricePerSqft);
             $stmt->bindParam(':overview', $overview);
             $stmt->bindParam(':highlights', $highlights);
-            $stmt->bindParam(':stories', $stories);
-            $stmt->bindParam(':yearBuilt', $yearBuilt);
+            $stmt->bindParam(':stories', $stories, PDO::PARAM_INT);
+            $stmt->bindParam(':year_built', $yearBuilt, PDO::PARAM_INT);
             $stmt->bindParam(':sprinklers', $sprinklers);
-            $stmt->bindParam(':totalBldgSize', $totalBldgSize);
-            $stmt->bindParam(':parkingSpaces', $parkingSpaces);
-            $stmt->bindParam(':landAcres', $landAcres);
-            $stmt->bindParam(':landSqft', $landSqft);
+            $stmt->bindParam(':total_building_size', $totalBldgSize);
+            $stmt->bindParam(':parking_spaces', $parkingSpaces, PDO::PARAM_INT);
+            $stmt->bindParam(':land_acres', $landAcres);
+            $stmt->bindParam(':land_sqft', $landSqft);
             $stmt->bindParam(':zoning', $zoning);
-            $stmt->bindParam(':apnParcelID', $apnParcelID);
+            $stmt->bindParam(':apn_parcel_id', $apnParcelID);
             $stmt->bindParam(':providers', $providers);
 
             if ($stmt->execute()) {
@@ -198,33 +197,54 @@ class Property
     function get(object $property)
     {
         try {
+            $coords = $property->coordinates ? json_decode($property->coordinates) : null;
             $highlights = $this->format($property->highlights);
+            $images = $property->images ? json_decode($property->images) : [];
+            $providers = $property->providers ? json_decode($property->providers) : [];
 
-            return new RealEstateProperty(
-                $property->id,
-                $property->apn_parcel_id ?? 'N/A',
-                $property->propertyClass ?? 'N/A',
+            $coordinates = new Coordinates(
+                $coords->longitude ?? 0.0,
+                $coords->latitude ?? 0.0
+            );
+            $location = new Location(
                 $property->street_number ?? '',
                 $property->street_name ?? '',
                 $property->city ?? '',
                 $property->state ?? '',
                 $property->zipcode ?? '',
                 $property->country ?? '',
-                $property->coordinates ?? '',
+                $coordinates
+            );
+            $saleDetails = new SaleDetails(
                 $property->price ?? 0.00,
-                $property->price_sqft ?? 0.0,
-                $property->cap_rate ?? 0.0,
+                $property->price_per_sqft ?? 0.00,
+                $property->overview ?? '',
+                $highlights
+            );
+            $buildingDetails = new BuildingDetails(
                 $property->stories ?? 1,
                 $property->year_built ?? 0000,
                 $property->sprinklers ?? '',
-                $property->parking_spaces ?? 0,
-                $property->total_bldg_size ?? 0.0,
+                $property->total_building_size ?? 0.0
+            );
+            $landDetails = new LandDetails(
                 $property->land_acres ?? 0.0,
                 $property->land_sqft ?? 0.0,
                 $property->zoning ?? '',
-                $highlights,
-                $property->overview ?? '',
-                $property->provider_id ?? ''
+                $property->property_sub_type ?? [],
+                $property->parking_spaces ?? 0
+            );
+
+            return new RealEstateProperty(
+                $property->id,
+                $property->apn_parcel_id ?? 'N/A',
+                PropertyClass::fromString($property->property_class),
+                $location,
+                $saleDetails,
+                $buildingDetails,
+                $landDetails,
+                $images,
+                $providers
             );
         } catch (TypeError $e) {
             throw new DestructuredException($e);
@@ -321,11 +341,18 @@ class Property
     {
         try {
 
-            $results = $this->connection->prepare(
-                "CALL getRealEstatePropertyByAPN('$apn')"
+            $stmt = $this->connection->prepare(
+                "CALL getRealEstatePropertyByAPN(:apn)"
             );
 
-            return $this->get($results[0]);
+            $stmt->bindParam(':apn', $apn);
+            
+            if ($stmt->execute()) {
+                $result = $stmt->fetchAll(PDO::FETCH_OBJ);
+                return $this->get($result[0]);
+            }
+
+            return false;
         } catch (DestructuredException $e) {
             throw new DestructuredException($e);
         } catch (Exception $e) {
@@ -337,11 +364,18 @@ class Property
     {
         try {
 
-            $results = $this->connection->prepare(
-                "CALL getRealEstatePropertyByID('$id')"
+            $stmt = $this->connection->prepare(
+                "CALL getRealEstatePropertyByID(:id)"
             );
 
-            return $this->get($results[0]);
+            $stmt->bindParam(':id', $id);
+            
+            if ($stmt->execute()) {
+                $result = $stmt->fetchAll(PDO::FETCH_OBJ);
+                return $this->get($result[0]);
+            }
+
+            return false;
         } catch (DestructuredException $e) {
             throw new DestructuredException($e);
         } catch (Exception $e) {
