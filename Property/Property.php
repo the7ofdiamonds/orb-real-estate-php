@@ -4,18 +4,10 @@ namespace ORB\Real_Estate\Property;
 
 use ORB\Real_Estate\Database\Database;
 use ORB\Real_Estate\Exception\DestructuredException;
-use ORB\Real_Estate\Model\BuildingDetails;
-use ORB\Real_Estate\Model\Coordinates;
-use ORB\Real_Estate\Model\LandDetails;
-use ORB\Real_Estate\Model\Location;
-use ORB\Real_Estate\Model\PropertyClass;
 use ORB\Real_Estate\Model\RealEstateProperty;
 use ORB\Real_Estate\Model\RequestProperties;
-use ORB\Real_Estate\Model\SaleDetails;
 
-use stdClass;
 use Exception;
-use TypeError;
 
 use PDO;
 use PDOException;
@@ -27,56 +19,6 @@ class Property
     public function __construct()
     {
         $this->connection = (new Database())->getConnection();
-    }
-
-    function create(stdClass $property)
-    {
-        $coordinates = new Coordinates(
-            $property->longitude ?? 0.0,
-            $property->latitude ?? 0.0
-        );
-        $location = new Location(
-            $property->street_number ?? '',
-            $property->street_name ?? '',
-            $property->city ?? '',
-            $property->state ?? '',
-            $property->zipcode ?? '',
-            $property->country ?? '',
-            $coordinates ?? null
-        );
-        $saleDetails = new SaleDetails(
-            $property->price ?? 0.00,
-            $property->price_per_sqft ?? 0.00,
-            $property->overview ?? '',
-            $property->highlights ?? []
-        );
-        $buildingDetails = new BuildingDetails(
-            $property->stories ?? 1,
-            $property->year_built ?? 0000,
-            $property->sprinklers ?? false,
-            $property->total_building_size ?? 0.0
-        );
-        $landDetails = new LandDetails(
-            $property->land_acres ?? 0.0,
-            $property->land_sqft ?? 0.0,
-            $property->zoning ?? '',
-            $property->property_sub_type ?? [],
-            $property->parking_spaces ?? 0
-        );
-        $images = $property->images ?? [];
-        $providers = $property->providers ?? [];
-
-        return new RealEstateProperty(
-            '',
-            $property->apn_parcel_id ?? 'N/A',
-            PropertyClass::fromString($property->property_class),
-            $location,
-            $saleDetails,
-            $buildingDetails,
-            $landDetails,
-            $images,
-            $providers
-        );
     }
 
     function add(RealEstateProperty $property)
@@ -151,110 +93,6 @@ class Property
         }
     }
 
-    public static function searchParams(object $property): RequestProperties
-    {
-        $propertyClass = PropertyClass::fromString($property['property_class']);
-        $location = new Location(
-            $property['city'] ?? '',
-            $property['state'] ?? '',
-            $property['zipcode'] ?? '',
-            $property['country'] ?? '',
-            $property['coordinates'] ?? null
-        );
-        $saleDetails = new SaleDetails(
-            $property['price'] ?? 0.00,
-            $property['price_per_sqft'] ?? 0.00,
-            $property['cap_rate'] ?? 0.0,
-            $property['overview'] ?? '',
-            $property['highlights'] ?? []
-        );
-        $buildingDetails = new BuildingDetails(
-            $property['stories'] ?? 1,
-            $property['year_built'] ?? 0000,
-            $property['sprinklers'] ?? false,
-            $property['total_building_size'] ?? 0.0
-        );
-        $landDetails = new LandDetails(
-            $property['land_acres'] ?? 0.0,
-            $property['land_sqft'] ?? 0.0,
-            $property['zoning'] ?? ''
-        );
-        $providers = $property['providers'] ?? [];
-
-        return new RequestProperties($propertyClass, $location, $saleDetails, $buildingDetails, $landDetails, $providers);
-    }
-
-    function format($object)
-    {
-
-        if (is_serialized($object)) {
-            return unserialize($object);
-        }
-
-        return $object;
-    }
-
-    function get(object $property)
-    {
-        try {
-            $coords = $property->coordinates ? json_decode($property->coordinates) : null;
-            $highlights = $this->format($property->highlights);
-            $images = $property->images ? json_decode($property->images) : [];
-            $providers = $property->providers ? json_decode($property->providers) : [];
-
-            $coordinates = new Coordinates(
-                $coords->longitude ?? 0.0,
-                $coords->latitude ?? 0.0
-            );
-            $location = new Location(
-                $property->street_number ?? '',
-                $property->street_name ?? '',
-                $property->city ?? '',
-                $property->state ?? '',
-                $property->zipcode ?? '',
-                $property->country ?? '',
-                $coordinates
-            );
-            $saleDetails = new SaleDetails(
-                $property->price ?? 0.00,
-                $property->price_per_sqft ?? 0.00,
-                $property->overview ?? '',
-                $highlights
-            );
-            $buildingDetails = new BuildingDetails(
-                $property->stories ?? 1,
-                $property->year_built ?? 0000,
-                $property->sprinklers ?? '',
-                $property->total_building_size ?? 0.0
-            );
-            $landDetails = new LandDetails(
-                $property->land_acres ?? 0.0,
-                $property->land_sqft ?? 0.0,
-                $property->zoning ?? '',
-                $property->property_sub_type ?? [],
-                $property->parking_spaces ?? 0
-            );
-
-            return new RealEstateProperty(
-                $property->id,
-                $property->apn_parcel_id ?? 'N/A',
-                PropertyClass::fromString($property->property_class),
-                $location,
-                $saleDetails,
-                $buildingDetails,
-                $landDetails,
-                $images,
-                $providers
-            );
-        } catch (TypeError $e) {
-            throw new DestructuredException($e);
-        } catch (DestructuredException $e) {
-            throw new DestructuredException($e);
-        } catch (Exception $e) {
-            throw new DestructuredException($e);
-        }
-    }
-
     function residential(RequestProperties $requestProperties)
     {
         try {
@@ -262,7 +100,7 @@ class Property
             $saleDetails = $requestProperties->saleDetails;
             $buildingDetails = $requestProperties->buildingDetails;
             $landDetails = $requestProperties->landDetails;
-            $providers = $requestProperties->providers;
+            $provider = $requestProperties->provider;
 
             $results = $this->connection->prepare(
                 "CALL searchResidentialRealEstate()"
@@ -271,7 +109,7 @@ class Property
             $properties = [];
 
             foreach ($results as $property) {
-                $properties[] = $this->get($property);
+                $properties[] = (new RealEstateProperty())->toJSON($property);
             }
 
             return $properties;
@@ -289,7 +127,7 @@ class Property
             $saleDetails = $requestProperties->saleDetails;
             $buildingDetails = $requestProperties->buildingDetails;
             $landDetails = $requestProperties->landDetails;
-            $providers = $requestProperties->providers;
+            $provider = $requestProperties->provider;
 
             $results = $this->connection->prepare(
                 "CALL searchCommercialRealEstate()"
@@ -298,7 +136,7 @@ class Property
             $properties = [];
 
             foreach ($results as $property) {
-                $properties[] = $this->get($property);
+                $properties[] = (new RealEstateProperty())->toJSON($property);
             }
 
             return $properties;
@@ -312,21 +150,32 @@ class Property
     function search(RequestProperties $requestProperties)
     {
         try {
-            $propertyClass = $requestProperties->propertyClass;
+            $propertyClass = $requestProperties->propertyClass->value;
             $location = $requestProperties->location;
             $saleDetails = $requestProperties->saleDetails;
             $buildingDetails = $requestProperties->buildingDetails;
             $landDetails = $requestProperties->landDetails;
-            $providers = $requestProperties->providers;
+            $providers = $requestProperties->provider;
 
-            $results = $this->connection->prepare(
-                "CALL searchRealEstate('$propertyClass->value', '$location->city', '$location->zipcode', '$saleDetails->price')"
+            $stmt = $this->connection->prepare(
+                "CALL searchRealEstate(:property_class, :city, :zipcode, :price)"
             );
 
             $properties = [];
 
-            foreach ($results as $property) {
-                $properties[] = $this->get($property);
+            $stmt->bindParam(':property_class', $propertyClass);
+            $stmt->bindParam(':city', $location->city);
+            $stmt->bindParam(':zipcode', $location->zipcode);
+            $stmt->bindParam(':price', $saleDetails->price);
+
+            if ($stmt->execute()) {
+                $results = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+                foreach ($results as $property) {
+                    $properties[] = (new RealEstateProperty())->toJSON($property);
+                }
+
+                return $properties;
             }
 
             return $properties;
@@ -346,10 +195,10 @@ class Property
             );
 
             $stmt->bindParam(':apn', $apn);
-            
+
             if ($stmt->execute()) {
                 $result = $stmt->fetchAll(PDO::FETCH_OBJ);
-                return $this->get($result[0]);
+                return (new RealEstateProperty())->toJSON($result[0]);
             }
 
             return false;
@@ -369,10 +218,10 @@ class Property
             );
 
             $stmt->bindParam(':id', $id);
-            
+
             if ($stmt->execute()) {
                 $result = $stmt->fetchAll(PDO::FETCH_OBJ);
-                return $this->get($result[0]);
+                return (new RealEstateProperty())->toJSON($result[0]);
             }
 
             return false;

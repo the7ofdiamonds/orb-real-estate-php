@@ -3,6 +3,7 @@
 namespace ORB\Real_Estate\API;
 
 use ORB\Real_Estate\Exception\DestructuredException;
+use ORB\Real_Estate\Model\RequestProperties;
 use ORB\Real_Estate\Property\Property;
 
 use Exception;
@@ -52,7 +53,7 @@ class RealEstate
     {
         try {
             $body = json_decode($request->get_body(), true);
-            $requestProperties = $this->propertyClass->searchParams($body);
+            $requestProperties = (new RequestProperties)->fromJSON($body);
             $residentialResponse = $this->propertyClass->residential($requestProperties);
             $response = new WP_REST_Response($residentialResponse);
             $response->set_status(200);
@@ -69,7 +70,7 @@ class RealEstate
     {
         try {
             $body = json_decode($request->get_body(), true);
-            $requestProperties = $this->propertyClass->searchParams($body);
+            $requestProperties = (new RequestProperties)->fromJSON($body);
             $commercialResponse = $this->propertyClass->commercial($requestProperties);
             $response = new WP_REST_Response($commercialResponse);
             $response->set_status(200);
@@ -85,8 +86,8 @@ class RealEstate
     function search(WP_REST_Request $request)
     {
         try {
-            $body = json_decode($request->get_body(), true);
-            $requestProperties = $this->propertyClass->searchParams($body); error_log(print_r($requestProperties, true));
+            $body = json_decode($request->get_body());
+            $requestProperties = (new RequestProperties)->fromJSON($body);
             $searchResponse = $this->propertyClass->search($requestProperties);
             $response = new WP_REST_Response($searchResponse);
             $response->set_status(200);
