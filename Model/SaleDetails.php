@@ -2,6 +2,8 @@
 
 namespace ORB\Real_Estate\Model;
 
+use stdClass;
+
 class SaleDetails
 {
     public string $overview;
@@ -31,7 +33,21 @@ class SaleDetails
         if (!is_serialized($this->highlights)) {
             return $this->highlights;
         }
-        
+
         return serialize($this->highlights);
+    }
+
+    public function fromJSON(stdClass $sale_details)
+    {
+        $this->price = $sale_details->price ?? 0.00;
+        $this->pricePerSqft = $sale_details->price_per_sqft ?? 0.00;
+        $this->overview = $sale_details->overview ?? '';
+        $this->highlights = isset($sale_details->highlights) ? $sale_details->highlights : [];
+        return $this;
+    }
+
+    public function toJSON()
+    {
+        return json_encode($this);
     }
 }

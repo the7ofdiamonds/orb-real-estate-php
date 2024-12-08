@@ -31,7 +31,7 @@ class Property
             $state = $property->location->state ?? null;
             $zipcode = $property->location->zipcode ?? null;
             $country = $property->location->country ?? null;
-            $coordinates = $property->location->coordinates->setCoordinates() ?? null;
+            $coordinates = $property->location->coordinates->toJSON() ?? null;
             $price = $property->saleDetails->price ?? null;
             $pricePerSqft = $property->saleDetails->pricePerSqft ?? null;
             $overview = $property->saleDetails->overview ?? null;
@@ -104,13 +104,34 @@ class Property
             $provider = $requestProperties->provider;
 
             $stmt = $this->connection->prepare(
-                "CALL searchRealEstate(:property_class, :city, :zipcode, :price)"
+                "CALL searchRealEstate(
+                :property_class, :street_number, :street_name, :city, :state, :zipcode, :country, :coordinates,
+                :price, :price_per_sqft,
+                :stories, :year_built, :sprinklers, :total_building_size,
+                :land_acres, :land_sqft, :zoning, :parking_spaces,
+                :provider)"
             );
 
+            $coordinates = $location->coordinates->toJSON();
+
             $stmt->bindParam(':property_class', $propertyClass);
+            $stmt->bindParam(':street_number', $location->streetNumber);
+            $stmt->bindParam(':street_name', $location->streetName);
             $stmt->bindParam(':city', $location->city);
+            $stmt->bindParam(':state', $location->state);
             $stmt->bindParam(':zipcode', $location->zipcode);
+            $stmt->bindParam(':country', $location->country);
+            $stmt->bindParam(':coordinates', $coordinates);
             $stmt->bindParam(':price', $saleDetails->price);
+            $stmt->bindParam(':price_per_sqft', $saleDetails->pricePerSqft);
+            $stmt->bindParam(':stories', $buildingDetails->stories);
+            $stmt->bindParam(':year_built', $buildingDetails->yearBuilt);
+            $stmt->bindParam(':sprinklers', $buildingDetails->sprinklers);
+            $stmt->bindParam(':total_building_size', $buildingDetails->totalBldgSize);
+            $stmt->bindParam(':land_acres', $landDetails->landAcres);
+            $stmt->bindParam(':land_sqft', $landDetails->landSqft);
+            $stmt->bindParam(':zoning', $landDetails->zoning);
+            $stmt->bindParam(':parking_spaces', $landDetails->parkingSpaces);
             $stmt->bindParam(':provider', $provider);
 
             $properties = [];

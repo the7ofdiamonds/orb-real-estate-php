@@ -2,6 +2,8 @@
 
 namespace ORB\Real_Estate\Model;
 
+use stdClass;
+
 class InvestmentDetails
 {
     public bool $leased;
@@ -16,18 +18,16 @@ class InvestmentDetails
         bool $leased = false,
         int $leasedUnits = 0,
         int $totalUnits = 0,
-        float $occupancyRate = 0.0,
         float $netOperatingIncome = 0.00,
-        float $propertyValue = 0.0,
-        float $capRate = 0.0,
+        float $propertyValue = 0.00,
     ) {
         $this->leased = $leased;
         $this->leasedUnits = $leasedUnits;
         $this->totalUnits = $totalUnits;
-        $this->occupancyRate = $occupancyRate;
+        $this->occupancyRate = $this->getOccupancyRate();
         $this->netOperatingIncome = $netOperatingIncome;
         $this->propertyValue = $propertyValue;
-        $this->capRate = $capRate;
+        $this->capRate = $this->getCapRate();
     }
 
     function getOccupancyRate(): float
@@ -46,5 +46,22 @@ class InvestmentDetails
         }
 
         return $this->netOperatingIncome / $this->propertyValue;
+    }
+
+    public function fromJSON(stdClass $investment_details)
+    {
+        $this->leased = $investment_details->leased ?? false;
+        $this->leasedUnits = $investment_details->leasedUnits ?? 0;
+        $this->totalUnits = $investment_details->totalUnits ?? 0;
+        $this->occupancyRate = $this->getOccupancyRate();
+        $this->netOperatingIncome = $investment_details->netOperatingIncome ?? 0.00;
+        $this->propertyValue = $investment_details->propertyValue ?? 0.00;
+        $this->capRate = $this->getCapRate();
+        return $this;
+    }
+
+    public function toJSON()
+    {
+        return json_encode($this);
     }
 }
