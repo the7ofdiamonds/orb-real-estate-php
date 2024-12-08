@@ -93,60 +93,6 @@ class Property
         }
     }
 
-    function residential(RequestProperties $requestProperties)
-    {
-        try {
-            $location = $requestProperties->location;
-            $saleDetails = $requestProperties->saleDetails;
-            $buildingDetails = $requestProperties->buildingDetails;
-            $landDetails = $requestProperties->landDetails;
-            $provider = $requestProperties->provider;
-
-            $results = $this->connection->prepare(
-                "CALL searchResidentialRealEstate()"
-            );
-
-            $properties = [];
-
-            foreach ($results as $property) {
-                $properties[] = (new RealEstateProperty())->toJSON($property);
-            }
-
-            return $properties;
-        } catch (DestructuredException $e) {
-            throw new DestructuredException($e);
-        } catch (Exception $e) {
-            throw new DestructuredException($e);
-        }
-    }
-
-    function commercial(RequestProperties $requestProperties)
-    {
-        try {
-            $location = $requestProperties->location;
-            $saleDetails = $requestProperties->saleDetails;
-            $buildingDetails = $requestProperties->buildingDetails;
-            $landDetails = $requestProperties->landDetails;
-            $provider = $requestProperties->provider;
-
-            $results = $this->connection->prepare(
-                "CALL searchCommercialRealEstate()"
-            );
-
-            $properties = [];
-
-            foreach ($results as $property) {
-                $properties[] = (new RealEstateProperty())->toJSON($property);
-            }
-
-            return $properties;
-        } catch (DestructuredException $e) {
-            throw new DestructuredException($e);
-        } catch (Exception $e) {
-            throw new DestructuredException($e);
-        }
-    }
-
     function search(RequestProperties $requestProperties)
     {
         try {
@@ -155,18 +101,19 @@ class Property
             $saleDetails = $requestProperties->saleDetails;
             $buildingDetails = $requestProperties->buildingDetails;
             $landDetails = $requestProperties->landDetails;
-            $providers = $requestProperties->provider;
+            $provider = $requestProperties->provider;
 
             $stmt = $this->connection->prepare(
                 "CALL searchRealEstate(:property_class, :city, :zipcode, :price)"
             );
 
-            $properties = [];
-
             $stmt->bindParam(':property_class', $propertyClass);
             $stmt->bindParam(':city', $location->city);
             $stmt->bindParam(':zipcode', $location->zipcode);
             $stmt->bindParam(':price', $saleDetails->price);
+            $stmt->bindParam(':provider', $provider);
+
+            $properties = [];
 
             if ($stmt->execute()) {
                 $results = $stmt->fetchAll(PDO::FETCH_OBJ);

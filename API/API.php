@@ -15,15 +15,9 @@ class API
       'permission_callback' => '__return_true',
     ));
 
-    register_rest_route('orb/v1', '/real-estate/commercial', array(
+    register_rest_route('orb/v1', '/real-estate/class/(?P<class>[a-zA-Z0-9-]+)', array(
       'methods' => 'POST',
-      'callback' => array($realEstateAPI, 'commercial'),
-      'permission_callback' => '__return_true',
-    ));
-
-    register_rest_route('orb/v1', '/real-estate/residential', array(
-      'methods' => 'POST',
-      'callback' => array($realEstateAPI, 'residential'),
+      'callback' => array($realEstateAPI, 'search'),
       'permission_callback' => '__return_true',
     ));
 

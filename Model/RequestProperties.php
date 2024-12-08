@@ -25,7 +25,7 @@ class RequestProperties
 
     function fromJSON(stdClass $property)
     {
-        $this->propertyClass = PropertyClass::fromString($property->property_class ?? 'N/A');
+        $this->propertyClass = isset($property->property_class) ? PropertyClass::fromString($property->property_class) : null;
         $coordinates = new Coordinates(
             $property->location->coordinates->longitude ?? 0.0,
             $property->location->coordinates->latitude ?? 0.0
@@ -43,7 +43,7 @@ class RequestProperties
             $property->sale_details->price ?? 0.00,
             $property->sale_details->price_per_sqft ?? 0.00,
             $property->sale_details->overview ?? '',
-            $property->sale_details->highlights
+            isset($property->sale_details->highlights) ? $property->sale_details->highlights : []
         );
         $this->buildingDetails = new BuildingDetails(
             $property->building_details->stories ?? 1,

@@ -3,6 +3,8 @@
 namespace ORB\Real_Estate\API;
 
 use ORB\Real_Estate\Exception\DestructuredException;
+use ORB\Real_Estate\Model\PropertyClass;
+use ORB\Real_Estate\Model\RealEstateProperty;
 use ORB\Real_Estate\Model\RequestProperties;
 use ORB\Real_Estate\Property\Property;
 
@@ -26,7 +28,7 @@ class RealEstate
         try {
 
             $body = json_decode($request->get_body());
-            $property = $this->propertyClass->create($body);
+            $property = (new RealEstateProperty)->fromJSON($body);
 
             $add = $this->propertyClass->add($property);
 
@@ -49,45 +51,17 @@ class RealEstate
         }
     }
 
-    function residential(WP_REST_Request $request)
-    {
-        try {
-            $body = json_decode($request->get_body(), true);
-            $requestProperties = (new RequestProperties)->fromJSON($body);
-            $residentialResponse = $this->propertyClass->residential($requestProperties);
-            $response = new WP_REST_Response($residentialResponse);
-            $response->set_status(200);
-
-            return rest_ensure_response($response);
-        } catch (DestructuredException $e) {
-            return (new DestructuredException($e))->rest_ensure_response_error();
-        } catch (Exception $e) {
-            return (new DestructuredException($e))->rest_ensure_response_error();
-        }
-    }
-
-    function commercial(WP_REST_Request $request)
-    {
-        try {
-            $body = json_decode($request->get_body(), true);
-            $requestProperties = (new RequestProperties)->fromJSON($body);
-            $commercialResponse = $this->propertyClass->commercial($requestProperties);
-            $response = new WP_REST_Response($commercialResponse);
-            $response->set_status(200);
-
-            return rest_ensure_response($response);
-        } catch (DestructuredException $e) {
-            return (new DestructuredException($e))->rest_ensure_response_error();
-        } catch (Exception $e) {
-            return (new DestructuredException($e))->rest_ensure_response_error();
-        }
-    }
-
     function search(WP_REST_Request $request)
     {
         try {
+            $params = $request->get_params();
             $body = json_decode($request->get_body());
             $requestProperties = (new RequestProperties)->fromJSON($body);
+
+            if (isset($params['class'])) {
+                $requestProperties->propertyClass = PropertyClass::fromString($params['class']);
+            }
+
             $searchResponse = $this->propertyClass->search($requestProperties);
             $response = new WP_REST_Response($searchResponse);
             $response->set_status(200);
