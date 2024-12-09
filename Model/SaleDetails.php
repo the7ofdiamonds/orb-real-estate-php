@@ -7,7 +7,7 @@ use stdClass;
 class SaleDetails
 {
     public string $overview;
-    private array $highlights;
+    public array $highlights;
     public int $price;
     public float $pricePerSqft;
 
@@ -28,13 +28,13 @@ class SaleDetails
         return serialize($this->highlights);
     }
 
-    function getHighlights()
+    function getHighlights(string $highlights)
     {
-        if (!is_serialized($this->highlights)) {
-            return $this->highlights;
+        if (is_serialized($highlights)) {
+            return unserialize($highlights);
         }
 
-        return serialize($this->highlights);
+        return $highlights;
     }
 
     public function fromJSON(stdClass $sale_details)

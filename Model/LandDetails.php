@@ -12,13 +12,13 @@ class LandDetails
     public array $propertySubType;
     public int $parkingSpaces;
 
-    public function __construct(float $landAcres = 0.0, float $landSqft = 0.0, string $zoning = '', array $propertySubType = [], int $parkingSpaces = 0)
+    public function __construct($landAcres = 0.0, $landSqft = 0.0, $zoning = '', $propertySubType = [], $parkingSpaces = 0)
     {
-        $this->landAcres = $landAcres;
-        $this->landSqft = $landSqft;
-        $this->zoning = $zoning;
-        $this->propertySubType = $propertySubType;
-        $this->parkingSpaces = $parkingSpaces;
+        $this->landAcres = $landAcres ?? 0.0;
+        $this->landSqft = $landSqft ?? 0.0;
+        $this->zoning = $zoning ?? '';
+        $this->propertySubType = $propertySubType ?? [];
+        $this->parkingSpaces = $parkingSpaces ?? 0;
     }
 
     public function fromJSON(stdClass $land_details)

@@ -139,8 +139,12 @@ class Property
             if ($stmt->execute()) {
                 $results = $stmt->fetchAll(PDO::FETCH_OBJ);
 
+                if (sizeof($results) === 0) {
+                    throw new Exception("Property could not be found that meets this criteria.");
+                }
+
                 foreach ($results as $property) {
-                    $properties[] = (new RealEstateProperty())->toJSON($property);
+                    $properties[] = (new RealEstateProperty())->fromDB($property)->toJSON();
                 }
 
                 return $properties;
@@ -166,7 +170,12 @@ class Property
 
             if ($stmt->execute()) {
                 $result = $stmt->fetchAll(PDO::FETCH_OBJ);
-                return (new RealEstateProperty())->toJSON($result[0]);
+
+                if (!isset($result[0])) {
+                    throw new Exception("Property with the APN#{$apn} could not be found.");
+                }
+
+                return (new RealEstateProperty())->fromDB($result[0])->toJSON();
             }
 
             return false;
@@ -189,7 +198,12 @@ class Property
 
             if ($stmt->execute()) {
                 $result = $stmt->fetchAll(PDO::FETCH_OBJ);
-                return (new RealEstateProperty())->toJSON($result[0]);
+
+                if (!isset($result[0])) {
+                    throw new Exception("Property with the ID#{$id} could not be found.");
+                }
+
+                return (new RealEstateProperty())->fromDB($result[0])->toJSON();
             }
 
             return false;
