@@ -31,7 +31,7 @@ class Property
             $state = $property->location->state ?? null;
             $zipcode = $property->location->zipcode ?? null;
             $country = $property->location->country ?? null;
-            $coordinates = $property->location->coordinates->toJSON() ?? null;
+            $coordinates = $property->location->coordinates ? $property->location->coordinates->toDB() : null;
             $price = $property->saleDetails->price ?? null;
             $pricePerSqft = $property->saleDetails->pricePerSqft ?? null;
             $overview = $property->saleDetails->overview ?? null;
@@ -45,7 +45,7 @@ class Property
             $landSqft = $property->landDetails->landSqft ?? null;
             $zoning = $property->landDetails->zoning ?? null;
             $apnParcelID = $property->apnParcelID ?? null;
-            $providers = $property->setProviders() ?? null;
+            $contributors = $property->contributorsToJSON();
 
             $stmt = $this->connection->prepare("
                 CALL addRealEstateProperty(
@@ -77,7 +77,9 @@ class Property
             $stmt->bindParam(':land_sqft', $landSqft);
             $stmt->bindParam(':zoning', $zoning);
             $stmt->bindParam(':apn_parcel_id', $apnParcelID);
-            $stmt->bindParam(':providers', $providers);
+
+            // Get property id and add it to contributers
+            $stmt->bindParam(':providers', $contributors);
 
             if ($stmt->execute()) {
                 return true;

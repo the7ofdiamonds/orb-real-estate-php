@@ -22,8 +22,24 @@ class Coordinates
         return $this;
     }
 
+    public function fromDB(string $coordinates)
+    {
+        $coordinates = json_decode($coordinates);
+        $this->longitude = $coordinates->longitude ?? 0.0;
+        $this->latitude = $coordinates->latitude ?? 0.0;
+        return $this;
+    }
+
     public function toJSON()
     {
-        return json_encode($this);
+        return [
+            'longitude' => $this->longitude ?? 0.0,
+            'latitude' => $this->latitude ?? 0.0
+        ];
+    }
+
+    public function toDB()
+    {
+        return json_encode($this->toJSON());
     }
 }

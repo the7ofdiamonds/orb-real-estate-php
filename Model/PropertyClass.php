@@ -14,6 +14,7 @@ enum PropertyClass: string
     case INDUSTRIAL = 'industrial';
     case AGRICULTURAL = 'agricultural';
     case MIXED_USE = 'mixed_use';
+    case UNCLASSIFIED = 'unclassified';
 
     public static function fromString(string $value): PropertyClass
     {
@@ -25,6 +26,7 @@ enum PropertyClass: string
                 self::INDUSTRIAL->value => self::INDUSTRIAL,
                 self::AGRICULTURAL->value => self::AGRICULTURAL,
                 self::MIXED_USE->value => self::MIXED_USE,
+                self::UNCLASSIFIED->value => self::UNCLASSIFIED,
                 default => throw new \InvalidArgumentException("Invalid property class: $value"),
             };
         } catch (InvalidArgumentException $e) {

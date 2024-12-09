@@ -14,18 +14,18 @@ class RealEstateProperty
     public ?BuildingDetails $buildingDetails;
     public ?LandDetails $landDetails;
     public ?array $images;
-    public $providers;
+    public array $contributors;
 
     public function __construct(
         $id = '',
-        $apnParcelID = 'N/A',
+        $apnParcelID = null,
         $propertyClass = null,
         $location = null,
         $saleDetails = null,
         $buildingDetails = null,
         $landDetails = null,
         $images = [],
-        $providers = []
+        $contributors = []
     ) {
         $this->id = $id;
         $this->apnParcelID = $apnParcelID;
@@ -35,66 +35,102 @@ class RealEstateProperty
         $this->buildingDetails = $buildingDetails;
         $this->landDetails = $landDetails;
         $this->images = $images;
-        $this->providers = $providers;
+        $this->contributors = $contributors;
     }
 
-    public function setProviders()
+    public function contributorsFromJSON($contributors)
     {
-        return json_encode($this->providers);
+
+        if (is_null($contributors)) {
+            return [];
+        }
+
+        $contributorsClass = [];
+
+        foreach ($contributors as $contributor) {
+            $contributorsClass[] = (new Contributor)->fromJSON($contributor);
+        }
+
+        return $contributorsClass;
     }
 
     public function fromJSON(stdClass $property)
     {
-        $this->propertyClass = PropertyClass::fromString($property->property_class);
-        $this->apnParcelID = $property->apn_parcel_id;
-        $this->location = (new Location)->fromJSON($property->location);
-        $this->saleDetails = (new SaleDetails)->fromJSON($property->sale_details);
-        $this->buildingDetails = (new BuildingDetails)->fromJSON($property->building_details);
-        $this->landDetails = (new LandDetails)->fromJSON($property->land_details);
+        $this->propertyClass = $property->property_class ? PropertyClass::fromString($property->property_class) : null;
+        $this->apnParcelID = $property->apn_parcel_id ?? null;
+        $this->location = $property->location ? (new Location)->fromJSON($property->location) : null;
+        $this->saleDetails = $property->sale_details ? (new SaleDetails)->fromJSON($property->sale_details) : null;
+        $this->buildingDetails = $property->building_details ? (new BuildingDetails)->fromJSON($property->building_details) : null;
+        $this->landDetails = $property->land_details ? (new LandDetails)->fromJSON($property->land_details) : null;
         $this->images = $property->images ?? [];
-        $this->providers = $property->providers ?? [];
+        $this->contributors = $this->contributorsFromJSON($property->contributors);
 
         return $this;
     }
 
+    public function contributorsFromDB($contributors)
+    {
+
+        if (is_null($contributors)) {
+            return null;
+        }
+
+        return $this->contributorsFromJSON(json_decode($contributors));
+    }
+
     public function fromDB(stdClass $property)
     {
-        $this->id = $property->id;
-        $this->apnParcelID = $property->apn_parcel_id;
-        $this->propertyClass = PropertyClass::fromString($property->property_class);
-        $coordinates = (new Coordinates)->fromJSON(json_decode($property->coordinates));
+        $this->id = $property->id ?? '';
+        $this->apnParcelID = $property->apn_parcel_id ?? 'N/A';
+        $this->propertyClass = $property->property_class ? PropertyClass::fromString($property->property_class) : PropertyClass::UNCLASSIFIED;
+        $coordinates = is_string($property->coordinates) ? (new Coordinates)->fromDB($property->coordinates) : null;
         $this->location = new Location(
-            $property->street_number,
-            $property->street_name,
-            $property->city,
-            $property->state,
-            $property->zipcode,
-            $property->country,
+            $property->street_number ?? '',
+            $property->street_name ?? '',
+            $property->city ?? '',
+            $property->state ?? '',
+            $property->zipcode ?? '',
+            $property->country ?? '',
             $coordinates
         );
         $this->saleDetails = new SaleDetails(
-            $property->price,
-            $property->price_sf,
-            $property->overview,
-            unserialize($property->highlights)
+            $property->price ?? 0.00,
+            $property->price_sf ?? 0.0,
+            $property->overview ?? '',
+            $property->highlights ? unserialize($property->highlights) : []
         );
         $this->buildingDetails = new BuildingDetails(
-            $property->stories,
-            $property->year_built,
-            $property->sprinklers,
-            $property->total_bldg_size
+            $property->stories ?? 0,
+            $property->year_built ?? 0000,
+            $property->sprinklers ?? '',
+            $property->total_bldg_size ?? 0.0
         );
         $this->landDetails = new LandDetails(
-            $property->land_acres,
-            $property->land_sqft,
-            $property->zoning,
-            $property->property_sub_type,
-            $property->parking_spaces
+            $property->land_acres ?? 0.0,
+            $property->land_sqft ?? 0.0,
+            $property->zoning ?? '',
+            $property->property_sub_type ?? [],
+            $property->parking_spaces ?? 0
         );
         $this->images = $property->images ? unserialize($property->images) : [];
-        $this->providers = $property->providers ? json_decode($property->providers) : [];
+        $this->contributors = $this->contributorsFromDB($property->providers);
 
         return $this;
+    }
+
+    public function contributorsToJSON()
+    {
+
+        $contributorsJSON = null;
+
+        if (is_null($this->contributors)) {
+            return $contributorsJSON;
+        }
+        foreach ($this->contributors as $contributor) {
+            $contributorsJSON[] = $contributor->toJSON();
+        }
+
+        return json_encode($contributorsJSON);
     }
 
     public function toJSON()
@@ -135,7 +171,7 @@ class RealEstateProperty
                 'parking_spaces' => $this->landDetails->parkingSpaces
             ],
             'images' => $this->images,
-            'providers' => $this->providers
+            'contributors' => $this->contributors
         ];
     }
 }
