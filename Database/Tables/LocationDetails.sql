@@ -1,4 +1,4 @@
-CREATE TABLE `location` (
+CREATE TABLE `location_details` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `real_estate_id` bigint DEFAULT NULL,
   `street_number` varchar(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,

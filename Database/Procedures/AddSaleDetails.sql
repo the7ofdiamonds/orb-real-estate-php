@@ -9,7 +9,7 @@ BEGIN
  	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while inserting the real estate property.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while inserting the sale details.';
     END;
 
 	START TRANSACTION;
@@ -19,7 +19,7 @@ BEGIN
 
 	SET @sale_details_id = LAST_INSERT_ID();
     
-	CALL updateRealEstateSaleDetails(@sale_details_id);
+	CALL updateRealEstateSaleDetails(p_real_estate_id, @sale_details_id);
     
     COMMIT;
 END

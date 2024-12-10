@@ -37,7 +37,7 @@ BEGIN
 
 	SET @real_estate_id = LAST_INSERT_ID();
     
-	CALL addLocation(@real_estate_id, p_street_number, p_street_name, p_city, p_state, p_zipcode, p_country, p_coordinates);
+	CALL addLocationDetails(@real_estate_id, p_street_number, p_street_name, p_city, p_state, p_zipcode, p_country, p_coordinates);
 	CALL addSaleDetails(@real_estate_id, p_price, p_price_per_sqft, p_overview, p_highlights);
 	CALL addBuildingDetails(@real_estate_id, p_stories, p_year_built, p_sprinklers, p_total_building_size);
 	CALL addLandDetails(@real_estate_id, p_parking_spaces, p_land_acres, p_land_sqft, p_zoning);

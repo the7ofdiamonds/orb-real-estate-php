@@ -1,5 +1,6 @@
 CREATE TABLE `image` (
   `id` bigint NOT NULL AUTO_INCREMENT,
+  `provider_id` bigint COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `description` varchar(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `url` varchar(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,

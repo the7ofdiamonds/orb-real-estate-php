@@ -1,6 +1,7 @@
 CREATE TABLE `sale_details` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `real_estate_id` bigint COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+  `investment_details_id` bigint COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `price` int COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `price_per_sqft` float DEFAULT NULL,
   `overview` bigint DEFAULT NULL,
