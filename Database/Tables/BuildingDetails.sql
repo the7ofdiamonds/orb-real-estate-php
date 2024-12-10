@@ -1,6 +1,6 @@
 CREATE TABLE `building_details` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `real_estate_id` bigint COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+  `land_details_id` bigint COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `stories` int COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `year_built` int COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `sprinklers` varchar(255) DEFAULT NULL,

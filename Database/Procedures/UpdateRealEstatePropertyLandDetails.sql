@@ -6,7 +6,7 @@ BEGIN
  	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while updating real estate property with land details.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while updating the real estate property with land details.';
     END;
 
 	START TRANSACTION;

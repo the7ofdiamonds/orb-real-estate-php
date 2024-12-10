@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`%` PROCEDURE `addRealEstateProperty`(
+CREATE DEFINER=`root`@`%` PROCEDURE `addInvestmentDetails`(
 	IN p_sale_details_id BIGINT,
 	IN p_leased INT,
 	IN p_leased_units INT,
