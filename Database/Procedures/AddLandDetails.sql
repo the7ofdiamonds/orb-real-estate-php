@@ -6,11 +6,6 @@ CREATE DEFINER=`root`@`%` PROCEDURE `addLandDetails`(
 	IN p_zoning VARCHAR(255)
 )
 BEGIN
- 	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while inserting the land details.';
-    END;
 
 	START TRANSACTION;
 
@@ -19,7 +14,7 @@ BEGIN
 
     SET @land_details_id = LAST_INSERT_ID();
     
-	CALL updateRealEstateLandDetails(p_real_estate_id, @land_details_id);
+	CALL updateRealEstatePropertyLandDetails(p_real_estate_id, @land_details_id);
     
     COMMIT;
 END

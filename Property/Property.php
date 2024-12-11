@@ -45,16 +45,17 @@ class Property
             $landSqft = $property->landDetails->landSqft ?? null;
             $zoning = $property->landDetails->zoning ?? null;
             $apnParcelID = $property->apnParcelID ?? null;
+            $images = json_encode($property->images);
             $contributors = $property->contributorsToJSON();
 
-            $stmt = $this->connection->prepare("
-                CALL addRealEstateProperty(
+            $stmt = $this->connection->prepare(
+                "CALL addRealEstateProperty(
                     :property_class, :street_number, :street_name, :city, :state,
                     :zipcode, :country, :coordinates, :price, :price_per_sqft, :overview,
                     :highlights, :stories, :year_built, :sprinklers, :total_building_size,
-                    :parking_spaces, :land_acres, :land_sqft, :zoning, :apn_parcel_id, :providers
-                )
-            ");
+                    :parking_spaces, :land_acres, :land_sqft, :zoning, :apn_parcel_id, :images,
+                    :contributors)"
+            );
 
             $stmt->bindParam(':property_class', $propertyClass);
             $stmt->bindParam(':street_number', $streetNumber);
@@ -78,9 +79,22 @@ class Property
             $stmt->bindParam(':zoning', $zoning);
             $stmt->bindParam(':apn_parcel_id', $apnParcelID);
 
-            // Get property id and add it to contributers
-            $stmt->bindParam(':providers', $contributors);
+            $stmt->bindParam(':images', $images);
+            $stmt->bindParam(':contributors', $contributors);
 
+            $stmt->execute();
+
+// Fetch the result of the procedure (the inserted ID)
+$stmt->closeCursor(); // Close the previous result set
+
+// Execute the SELECT statement to get the result (real estate ID)
+$stmt = $this->connection->prepare("SELECT @real_estate_id AS resultSet");
+$stmt->execute();
+
+// Fetch the result
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+$realEstateId = $result['resultSet'];
+            error_log(print_r($realEstateId, true));
             if ($stmt->execute()) {
                 return true;
             }

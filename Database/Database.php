@@ -76,7 +76,7 @@ class Database
             $stmt->execute();
 
             if ($stmt->fetch()) {
-                error_log("Database exists.\n");
+                error_log("Database {$this->db_name} exists.\n");
                 return true;
             } else {
                 $createDatabaseQuery = "CREATE DATABASE `$this->db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
@@ -182,8 +182,7 @@ class Database
                 $stmt->execute();
 
                 if ($stmt->fetch()) {
-                    error_log("Table exists.\n");
-                    return true;
+                    error_log("Table {$table_name} exists.\n");
                 } else {
                     $file = $dir . '/' . $table['basename'];
                     $this->execute($file);
@@ -222,8 +221,7 @@ class Database
                 $stmt->execute();
 
                 if ($stmt->fetch()) {
-                    error_log("View exists.\n");
-                    return true;
+                    error_log("View {$view_name} exists.\n");
                 } else {
                     $file = $dir . '/' . $view['basename'];
                     $this->execute($file);
@@ -262,8 +260,7 @@ class Database
                 $stmt->execute();
 
                 if ($stmt->fetch()) {
-                    error_log("Procedure exists.\n");
-                    return true;
+                    error_log("Procedure {$procedure_name} exists.\n");
                 } else {
                     $file = $dir . '/' . $procedure['basename'];
                     $this->execute($file);

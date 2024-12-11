@@ -98,7 +98,6 @@ BEGIN
         SET @sql = CONCAT(@sql, ' AND provider = ', p_provider);
     END IF;
 
-    -- Execute the dynamically built query
     PREPARE stmt FROM @sql;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;

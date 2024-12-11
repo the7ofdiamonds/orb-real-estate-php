@@ -3,7 +3,7 @@ CREATE DEFINER=`root`@`%` PROCEDURE `addSaleDetails`(
     IN p_price INT,
     IN p_price_per_sqft FLOAT,
 	IN p_overview VARCHAR(255),
-    IN p_highlights TEXT,
+    IN p_highlights TEXT
 )
 BEGIN
  	DECLARE EXIT HANDLER FOR SQLEXCEPTION 

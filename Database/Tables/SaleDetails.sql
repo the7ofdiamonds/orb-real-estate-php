@@ -4,7 +4,7 @@ CREATE TABLE `sale_details` (
   `investment_details_id` bigint COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `price` int COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
   `price_per_sqft` float DEFAULT NULL,
-  `overview` bigint DEFAULT NULL,
-  `highlights` varchar(255) DEFAULT NULL,
+  `overview` varchar(255) DEFAULT NULL,
+  `highlights` text DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;

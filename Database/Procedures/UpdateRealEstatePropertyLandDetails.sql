@@ -1,13 +1,8 @@
-CREATE DEFINER=`root`@`%` PROCEDURE `UpdateRealEstatePropertyLandDetails`(
+CREATE DEFINER=`root`@`%` PROCEDURE `updateRealEstatePropertyLandDetails`(
 	IN p_real_estate_id BIGINT,
     IN p_land_details_id BIGINT
 )
 BEGIN
- 	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while updating the real estate property with land details.';
-    END;
 
 	START TRANSACTION;
 

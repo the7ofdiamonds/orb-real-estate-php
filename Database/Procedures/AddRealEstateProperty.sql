@@ -22,25 +22,29 @@ CREATE DEFINER=`root`@`%` PROCEDURE `addRealEstateProperty`(
 	IN p_apn_parcel_id VARCHAR(255),
 	IN p_images JSON,
     IN p_contributors JSON
-)
+    )
 BEGIN
- 	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while inserting the real estate property.';
-    END;
 
-	START TRANSACTION;
+    START TRANSACTION;
 
-    INSERT INTO real_estate (property_class, apn_parcel_id, images, contributors)
+    SELECT JSON_VALID(p_images) AS is_images_valid, 
+           JSON_VALID(p_contributors) AS is_contributors_valid;
+    
+    IF JSON_VALID(p_images) = 0 AND JSON_VALID(p_contributors) = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid JSON provided';
+    END IF;
+    
+	INSERT INTO real_estate (property_class, apn_parcel_id, images, contributors)
     VALUES (p_property_class, p_apn_parcel_id, p_images, p_contributors);
 
-	SET @real_estate_id = LAST_INSERT_ID();
+    SET @real_estate_id = LAST_INSERT_ID();
     
 	CALL addLocationDetails(@real_estate_id, p_street_number, p_street_name, p_city, p_state, p_zipcode, p_country, p_coordinates);
 	CALL addSaleDetails(@real_estate_id, p_price, p_price_per_sqft, p_overview, p_highlights);
-	CALL addBuildingDetails(@real_estate_id, p_stories, p_year_built, p_sprinklers, p_total_building_size);
-	CALL addLandDetails(@real_estate_id, p_parking_spaces, p_land_acres, p_land_sqft, p_zoning);
-    
+    CALL addBuildingDetails(@real_estate_id, p_stories, p_year_built, p_sprinklers, p_total_building_size);
+    CALL addLandDetails(@real_estate_id, p_parking_spaces, p_land_acres, p_land_sqft, p_zoning);
+
     COMMIT;
+    
+	SELECT @real_estate_id AS resultSet;
 END

@@ -9,11 +9,6 @@ CREATE DEFINER=`root`@`%` PROCEDURE `addLocationDetails`(
     IN p_coordinates JSON
 )
 BEGIN
- 	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while inserting the location details.';
-    END;
 
 	START TRANSACTION;
 
@@ -22,7 +17,7 @@ BEGIN
 
     SET @location_details_id = LAST_INSERT_ID();
     
-	CALL updateRealEstateLocationDetails(p_real_estate_id, @location_details_id);
+	CALL updateRealEstatePropertyLocationDetails(p_real_estate_id, @location_details_id);
     
     COMMIT;
 END

@@ -8,11 +8,6 @@ CREATE DEFINER=`root`@`%` PROCEDURE `addInvestmentDetails`(
 	IN p_cap_rate FLOAT
 )
 BEGIN
- 	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while inserting the investment details.';
-    END;
 
 	START TRANSACTION;
 

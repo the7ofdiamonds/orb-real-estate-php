@@ -4,11 +4,6 @@ CREATE DEFINER=`root`@`%` PROCEDURE `addProvider`(
 	IN p_services TEXT
 )
 BEGIN
- 	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-    BEGIN
-        ROLLBACK;
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred while inserting the provider.';
-    END;
 
 	START TRANSACTION;
 
